@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Project Ops"
+  short_description: "Scaffold and maintain GitHub-ready software projects"
+  default_prompt: "Use $github-project-ops to create or improve this GitHub project with Python-first defaults."
