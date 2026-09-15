@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = [[ project_name | tojson ]]
+version = "0.1.0"
+description = [[ description | to_json(ensure_ascii=False) ]]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+[% if project_license == 'MIT' %]
+license = "MIT"
+license-files = ["LICENSE"]
+[% endif %]
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2",
+  "mypy>=1.18,<2",
+  "pytest>=9,<10",
+  "ruff>=0.12,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/[[ package_name ]]"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-config --strict-markers -ra"
+xfail_strict = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+strict = true

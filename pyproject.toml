@@ -1,0 +1,31 @@
+[project]
+name = "gh-project-scaffold-dev"
+version = "0.2.0"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = [
+  "build>=1.2,<2",
+  "copier>=9.18.2,<10",
+  "hatchling>=1.27,<2",
+  "mypy>=1.18,<2",
+  "pytest>=9,<10",
+  "pyyaml>=6,<7",
+  "ruff>=0.12,<1",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-config --strict-markers -ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = ["tmp-test-runs"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true

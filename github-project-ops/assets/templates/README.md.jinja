@@ -1,0 +1,36 @@
+# [[ project_name ]]
+
+[[ description ]]
+
+## Development
+
+Requires Python 3.11 or newer.
+
+```sh
+python -m venv .venv
+# Activate .venv using the command for your shell.
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy src
+python -m build
+```
+
+Import the package with `import [[ package_name ]]`.
+
+## Template updates
+
+Commit your changes, including `.copier-answers.yml`, before updating.
+Use the gh-project-scaffold `update --preview` command to review upstream changes.
+Resolve any conflicts before accepting an update.
+
+## Releases
+
+The bundled workflow tests and builds distributions for `v*` tags.
+Its artifacts are available in GitHub Actions; package publishing is not enabled.
+[% if project_license == 'MIT' %]
+## License
+
+MIT. See [LICENSE](LICENSE).
+[% endif %]

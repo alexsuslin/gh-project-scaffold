@@ -22,7 +22,7 @@ Treat `public` or `private`, `python` or another stack, and `bootstrap`, `audit`
 ## Modes
 
 ### Bootstrap mode
-Use for a new or nearly empty repository. Scaffold the core project files directly when asked, using the templates in `assets/templates/` as the starting point.
+Use for a new or nearly empty repository. For Python projects, use `scripts/scaffold.py create` and its `--preview` mode; read `references/generator.md`. The Copier templates in `assets/templates/` render names, ownership, licensing, and saved answers consistently. For other stacks, adapt the relevant conventions.
 
 ### Audit mode
 Use for an existing repository. Inspect current files first, identify missing or weak conventions, and patch incrementally instead of replacing working user-authored structure.
@@ -40,14 +40,14 @@ Use for CI/CD upkeep, contributor-experience improvements, docs refreshes, and k
 3. Read `references/repo-standards.md` for shared standards.
 4. Read `references/python-defaults.md` when the project is Python or the user has not specified another stack.
 5. Read `references/github-actions.md` when touching CI/CD, releases, artifacts, or publication.
-6. Copy or adapt files from `assets/templates/` instead of regenerating common boilerplate from scratch.
+6. For a Python bootstrap or generated-project update, follow `references/generator.md`. Preview changes first, then apply them within the user's request. Keep `.copier-answers.yml` in Git. Install, test, and build the result; do not copy raw `.jinja` inputs as finished project files.
 7. Preserve coherent existing conventions unless the user asks to standardize aggressively.
 
 ## Standard Outputs
 
 When appropriate, scaffold or improve:
 
-- `pyproject.toml`
+- `pyproject.toml`, `src/<package>/`, and a minimal package test for Python projects
 - `README.md`
 - `AGENTS.md`
 - `CONTRIBUTING.md`
@@ -57,7 +57,7 @@ When appropriate, scaffold or improve:
 - `.gitignore`
 - `.github/pull_request_template.md`
 - `.github/ISSUE_TEMPLATE/...`
-- `.github/workflows/ci.yml`
+- `.github/dependabot.yml` and `.github/workflows/ci.yml`
 - `.github/workflows/release.yml`
 
 Create `CODEOWNERS`, `LICENSE`, or packaging/release extras when they fit the repository type and the user has not ruled them out.
@@ -73,9 +73,10 @@ Create `CODEOWNERS`, `LICENSE`, or packaging/release extras when they fit the re
 ## References
 
 - Read `references/repo-standards.md` for shared docs, branching, tagging, semver, release notes, artifacts, and XDG guidance.
+- Read `references/generator.md` for creation, isolated diff previews, saved answers, and conflict-safe updates.
 - Read `references/python-defaults.md` for `pyproject.toml`, `src/`, `pytest`, `ruff`, `mypy`, and packaging defaults.
 - Read `references/github-actions.md` for GitHub Actions CI, release automation, and publishing guidance.
 
 ## Validation
 
-After scaffolding, run `scripts/validate_scaffold.py <repo-path>` to confirm the minimum expected repository structure. Use `--public` when validating a public-facing scaffold that should include contributor and security docs.
+After scaffolding, run `scripts/validate_scaffold.py <repo-path>` with Python 3.11+. Use `--public` for contributor and security docs, `--stack generic` for non-Python projects, and `--json` for automation. Exit codes are 0 (complete), 1 (missing or invalid files), and 2 (invalid invocation). This is a structural check; also run the resulting project's tests, quality checks, and build before calling a scaffold ready. The release template produces workflow artifacts; GitHub Release creation and package publication require separate configuration.
