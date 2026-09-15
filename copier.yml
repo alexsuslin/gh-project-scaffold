@@ -1,0 +1,56 @@
+_min_copier_version: "9.18.2"
+_subdirectory: github-project-ops/assets/templates
+_envops:
+  keep_trailing_newline: true
+  variable_start_string: "[["
+  variable_end_string: "]]"
+  block_start_string: "[%"
+  block_end_string: "%]"
+_exclude:
+  - README.public.md
+  - README.private.md
+  - LICENSE-MIT.txt
+  - __pycache__
+  - "*.pyc"
+
+project_name:
+  type: str
+  help: Python distribution name
+  validator: >-
+    [% if not (project_name | regex_search('^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$')) %]
+    Use a lowercase package name, for example weather-kit.
+    [% endif %]
+
+package_name:
+  type: str
+  default: "[[ project_name | replace('-', '_') | replace('.', '_') ]]"
+  validator: >-
+    [% if not (package_name | regex_search('^[a-z][a-z0-9_]*$')) %]
+    Use a lowercase Python import name.
+    [% endif %]
+
+owner:
+  type: str
+  help: GitHub username or organization
+  validator: >-
+    [% if not (owner | regex_search('^[A-Za-z0-9][A-Za-z0-9-]{0,38}$')) %]
+    Use a GitHub username or organization name.
+    [% endif %]
+
+description:
+  type: str
+  default: "A Python project."
+
+visibility:
+  type: str
+  default: public
+  choices: [public, private]
+
+project_license:
+  type: str
+  default: MIT
+  choices: [MIT, none]
+
+copyright_year:
+  type: int
+  default: 2026

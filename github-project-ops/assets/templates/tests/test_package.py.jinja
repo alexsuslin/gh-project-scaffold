@@ -1,0 +1,9 @@
+from importlib import import_module
+from importlib.metadata import distribution
+
+
+def test_installed_distribution_contains_importable_package():
+    package = import_module("[[ package_name ]]")
+    metadata = distribution("[[ project_name ]]")
+    assert package.__file__ is not None
+    assert metadata.version

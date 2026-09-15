@@ -1,38 +1,50 @@
 # Python Defaults
 
-## Packaging
+Use `pyproject.toml`, a `src/` package, and a small test suite. Preserve an
+existing healthy backend or dependency manager. The bundled Copier template uses
+Hatchling, supports Python 3.11+, and separates runtime dependencies from the
+`dev` extra.
 
-- Prefer `pyproject.toml` as the project metadata and tool configuration entry point.
-- Prefer `src/` layout for packages that will be imported or distributed.
-- Keep metadata explicit: project name, version, description, Python requirement, readme, and classifiers when useful.
+## Generate and verify
 
-## Testing And Quality
+Follow [generator.md](generator.md) for `create --preview`, creation, and updates.
+Names, module paths, README, ownership, license, and saved answers are rendered
+together. Files ending in `.jinja` are template inputs, not files to copy unchanged.
 
-- Use `pytest` for tests.
-- Use `ruff` for linting and formatting when that fits the repo.
-- Use `mypy` when static types improve confidence or public API stability.
-- Keep commands easy to discover in docs and CI.
+After generation:
 
-## Dependency Hygiene
-
-- Keep runtime dependencies separate from development dependencies.
-- Avoid heavy packaging machinery unless the project truly needs it.
-- Prefer one clear toolchain over multiple overlapping tools that solve the same job.
-
-## Suggested Layout
-
-```text
-project-root/
-  pyproject.toml
-  README.md
-  src/
-    package_name/
-      __init__.py
-  tests/
+```sh
+python -m venv .venv
+# Activate .venv using the command for your shell.
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy src
+python -m build
 ```
 
-## CLI And App Considerations
+The starter test checks the installed distribution and importable package.
+Replace it with useful behavior tests as the project grows. This repository's
+integration test builds the rendered sample into an sdist/wheel, installs the
+wheel in a clean environment, and imports it outside the source checkout.
 
-- If the repo is a CLI or application, add an entry point in `pyproject.toml`.
-- If the app stores local files, follow the XDG guidance from `references/repo-standards.md`.
-- If the repo is only a library, keep runtime file handling out of the default scaffold.
+For existing repositories, adapt individual guidance instead of running create
+over existing files. Non-Python repositories should keep their current toolchain
+and use the validator's `--stack generic` profile.
+
+## Compatibility and dependencies
+
+Keep the minimum Python version aligned across metadata, Ruff, mypy, and CI.
+The sample tests Python 3.11 and 3.14 on Linux and Windows.
+
+Use a lockfile for reproducible application/developer environments when useful.
+Library runtime ranges and developer lockfiles serve different purposes.
+The root repository uses uv; generated projects do not require it.
+Dependabot maintains Python requirements and workflow Actions.
+
+## Runtime files
+
+Add a `[project.scripts]` entry only when there is an actual CLI entry point.
+Apply XDG config/cache/state/data guidance only to applications storing runtime
+files; do not add it to a pure library.

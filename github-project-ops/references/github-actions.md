@@ -1,35 +1,50 @@
 # GitHub Actions
 
-## GitHub Actions Baseline
-
-Use GitHub Actions for the minimum automation needed to keep the repository healthy without burying the project in workflow noise.
-
 ## CI
 
-- Run tests on pushes and pull requests.
-- Run linting and type checks when the repository has them.
-- Keep the default CI path fast enough that contributors can trust it.
+The bundled Python CI installs the package, runs pytest, checks Ruff formatting
+and lint, runs mypy, and builds distributions. Its Linux/Windows matrix covers
+Python 3.11 and 3.14. Adapt the matrix to the project's actual support policy.
 
-## Release
+Use explicit `contents: read` permissions and disable persisted checkout
+credentials when subsequent steps do not need Git authentication.
+Pin third-party actions to reviewed commit SHAs with a version comment.
+Keep pins current through Dependabot; check runner requirements when upgrading
+action major versions, especially for self-hosted runners.
 
-- Use a dedicated release workflow for tags, release branches, or manual dispatch.
-- Build artifacts in the workflow that owns the release so tags and outputs stay aligned.
-- Avoid publishing side effects from ordinary CI jobs.
+Cancel superseded CI runs with a workflow/ref concurrency group. Keep job
+timeouts finite and use caches tied to the dependency manifest.
 
-## Artifacts
+## Release artifacts
 
-- Upload build outputs as artifacts when they help review or release confidence.
-- Keep artifact names predictable and tied to version or platform.
-- Retain only what is useful; avoid bloating releases with redundant bundles.
+The bundled `release.yml` runs on `v*` tags or manual dispatch. It validates
+tag/version agreement for tagged runs, reruns tests and quality checks, builds
+wheel/sdist files, and uploads workflow artifacts. Artifact names include the
+commit SHA; missing artifacts fail the job.
 
-## Publish
+The tag check uses the static `[project].version` from the bundled template.
+For a project with dynamic/VCS versioning, adapt that check to the existing
+version source.
 
-- Publish only when the project needs distribution automation.
-- Separate "build and verify" from "publish" when credentials or trust boundaries matter.
-- For Python projects, prefer building wheels and source distributions before any publication step.
+A successful artifact build is not a published release. This template does not
+create GitHub Releases or publish packages. Keep release runs independent of
+CI cancellation so a newer push cannot cancel an in-flight release build.
 
-## Minimal vs Extended Workflows
+## Optional publishing
 
-- Start with one `ci.yml` and one `release.yml`.
-- Add matrix builds, caching, or publish jobs only when the project benefits from them.
-- Preserve an existing coherent workflow if it already meets the repository's needs.
+Add publishing when distribution is part of the user's request. Keep build and
+publish jobs separate. For PyPI, prefer Trusted Publishing with OIDC and a
+configured GitHub environment over long-lived API tokens. Grant
+`id-token: write` only to the publishing job. GitHub Release creation similarly
+needs `contents: write` only in its release job.
+
+Configure the destination project/environment before claiming publishing works.
+Avoid publishing from pull-request or ordinary test jobs.
+
+## Maintenance
+
+The bundled Dependabot file updates Python requirements and workflow actions.
+The skill repository's root Dependabot additionally updates its uv development
+lockfile. Update template Python dependencies manually because the source manifest is Jinja. GitHub's Actions updater scans root
+workflows, so maintainers must propagate reviewed action updates into the bundled
+templates too.
