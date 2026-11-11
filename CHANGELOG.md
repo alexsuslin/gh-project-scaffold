@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.6 — 2026-11-11
+
+### Added
+
+- `doctor` recognizes the documented Paper Lab offline test in a Python project's
+  root `README.md`. The PowerShell candidate includes `PYTHONPATH=src` and the
+  `.venv-paper` invocation of `unittest discover`. Adopt previews use the same candidate.
+- Regression fixtures cover exact and partial matches, the pytest fallback, and
+  read-only behavior.
+
 ## 0.3.5 — 2026-11-11
 
 ### Changed
