@@ -33,9 +33,12 @@ monorepos, nested infrastructure layouts, workflow YAML, shell scripts or depend
 graphs. Missing detection is unknown, not an instruction to replace the existing stack.
 Files inspected as text are limited to 1 MiB and must be regular UTF-8 files.
 
-Python check candidates come from explicit pytest/Ruff configuration. A root uv.lock
-selects `uv run --locked`; otherwise candidates use `python -m`. Node candidates
-require exactly one recognized npm/pnpm/Yarn lockfile and known script names.
+Python check candidates come from pytest, Ruff, Mypy and Pyright configuration in
+`pyproject.toml`. A root `uv.lock` selects `uv run --locked`; otherwise candidates use
+`python -m`. Mypy uses configured `files`, `modules` or `packages` when present and
+suggests `mypy .` when no targets are configured. Pyright uses its configured scope.
+Node candidates require exactly one recognized npm/pnpm/Yarn lockfile and known
+script names.
 These are hints: confirm environment prerequisites and side effects before execution.
 No test/build/deploy command is invented for .NET, infrastructure or unknown stacks.
 

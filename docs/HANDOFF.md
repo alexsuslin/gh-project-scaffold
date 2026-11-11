@@ -1,15 +1,16 @@
 # Handoff
 
-Current continuation point for the 0.3.0 project-readiness release. Command contracts
+Current continuation point after the 0.3.0 project-readiness pilots. Command contracts
 and limitations are documented in [the readiness guide](../github-project-ops/references/readiness.md).
 
 ## Outcome and acceptance
 
-- Current goal: release doctor, additive adopt, project AGENTS.md and handoff as v0.3.0.
-- Acceptance: read-only diagnosis; preview without changes; preserve existing files and
-  Git index; repeat adoption without rewriting edits; support existing context;
-  reject unsafe paths; preserve create/update behavior and distribution builds.
-- Scope: only this repository. Other personal projects and installed skills are untouched.
+- Current goal: detect Mypy and Pyright in doctor after the notion-cli and
+  busybar-ai-progress pilots.
+- Acceptance: report unverified candidates from explicit TOML configuration, retain
+  the existing Python runner selection, and cover both pilot configurations with
+  read-only tests against disposable Git repositories.
+- Scope: project-scaffolding and synthetic fixtures only.
 
 ## Current state
 
@@ -19,18 +20,21 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
   existing guidance/context preservation; shared handoff template; Python starter guidance.
 - Verified: CLI behavior on disposable repositories/worktrees, existing generator tests,
   package build/install, static checks and release archive smoke test (details below).
-- Delivery: the owner authorized a commit, push to main and publication on 2026-11-11.
-  The [GitHub release](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.0)
-  and [release workflow](https://github.com/alexsuslin/gh-project-scaffold/actions/workflows/release.yml)
-  are authoritative for remote publication and its checks; this document is prepared before publication.
+- Release delivery: [v0.3.0](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.0)
+  was published on 2026-11-11.
 - Local artifact: dist/v0.3.0/github-project-ops-v0.3.0.zip and SHA256SUMS.
-- User scenario: adopted this repository, then customized its AGENTS.md and this handoff.
-  No adoption or deployment was performed in any other personal project.
+- Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
+  exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
+  Mypy delegates to configured targets or proposes the repository root as a fallback.
+  The owner authorized committing and pushing this follow-up to main. Check the
+  main CI run for the commit containing this handoff for remote validation.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| Doctor type checker discovery | Full pytest suite, Windows Python 3.14 | 75 passed, 1 skipped | Both pilot fixtures and the targetless Mypy case passed. Symlink creation was unavailable. The full run used a short temporary path and process-scoped Git long-path support. |
+| Doctor type checker discovery | Ruff lint/format and mypy | Passed | python -m ruff check .; python -m ruff format --check .; python -m mypy github-project-ops/scripts scripts |
 | 0.3.0 working changes | Full pytest suite, Windows Python 3.14, outside sandbox | 71 passed, 1 skipped | tmp-test-runs/full-02; the skip is unavailable symlink creation; Windows junction test passed |
 | Later handoff-link/legacy-guidance refinement | Readiness pytest suite, sandbox | 22 passed, 2 skipped | tmp-test-runs/readiness-06; symlink and junction creation unavailable inside sandbox |
 | 0.3.0 working changes | Ruff lint/format and mypy | Passed | python -m ruff check .; python -m ruff format --check .; python -m mypy github-project-ops/scripts scripts |
@@ -51,6 +55,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   is not implemented. Existing instructions are preserved rather than edited to add links.
 - Release acceptance: main contains the implementation, signed v0.3.0 identifies the
   intended source, CI and the release workflow pass, and the published ZIP matches SHA256SUMS.
-- Next concrete action after release: select a pilot repository only when the owner
-  includes it in a new task. Existing projects remain outside this release's scope.
-- Who can take it: owner or a session with that explicit project scope.
+- Next action: verify the main CI run for the doctor follow-up.

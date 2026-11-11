@@ -190,6 +190,14 @@ def inspect_project(destination: Path) -> dict[str, Any]:
                 command(
                     "format-check", f"{prefix} ruff format --check .", "pyproject.toml [tool.ruff]"
                 )
+            mypy = config.get("mypy")
+            if isinstance(mypy, dict):
+                # Let mypy resolve configured targets without copying them into a shell command.
+                has_targets = any(mypy.get(key) for key in ("files", "modules", "packages"))
+                target = "" if has_targets else " ."
+                command("mypy", f"{prefix} mypy{target}", "pyproject.toml [tool.mypy]")
+            if isinstance(config.get("pyright"), dict):
+                command("pyright", f"{prefix} pyright", "pyproject.toml [tool.pyright]")
             if (root / "uv.lock").is_file():
                 command("bootstrap", "uv sync --locked", "uv.lock")
         except (OSError, ValueError, TypeError) as error:

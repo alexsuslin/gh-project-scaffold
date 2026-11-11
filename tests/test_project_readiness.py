@@ -87,6 +87,57 @@ def test_doctor_detects_mixed_stack_and_bad_metadata(repository):
     assert "invalid_node_metadata" in {f["code"] for f in report["findings"]}
 
 
+@pytest.mark.parametrize(
+    ("tool", "configuration", "locked", "expected"),
+    [
+        pytest.param(
+            "mypy",
+            'python_version = "3.12"\nstrict = true\npackages = ["notion_cli"]\n',
+            False,
+            "python -m mypy",
+            id="notion-cli-mypy-packages",
+        ),
+        pytest.param(
+            "pyright",
+            'pythonVersion = "3.13"\ntypeCheckingMode = "strict"\ninclude = ["src", "tests"]\n',
+            True,
+            "uv run --locked pyright",
+            id="busybar-ai-progress-pyright-include",
+        ),
+        pytest.param(
+            "mypy",
+            "strict = true\nfiles = []\n",
+            True,
+            "uv run --locked mypy .",
+            id="mypy-without-targets",
+        ),
+    ],
+)
+def test_doctor_reports_python_type_check_candidates(
+    repository, tool, configuration, locked, expected
+):
+    (repository / "pyproject.toml").write_text(f"[tool.{tool}]\n{configuration}", encoding="utf-8")
+    if locked:
+        (repository / "uv.lock").touch()
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr  # Fixture has no commit, guidance, or handoff.
+    report = json.loads(result.stdout)
+    assert report["stacks"] == ["python"]
+    assert [item for item in report["commands"] if item["name"] == tool] == [
+        {
+            "name": tool,
+            "command": expected,
+            "source": f"pyproject.toml [tool.{tool}]",
+            "verified": False,
+        }
+    ]
+    assert "commands_unknown" not in {item["code"] for item in report["findings"]}
+    assert report["checks_executed"] is False
+    assert snapshot(repository) == before
+
+
 def test_doctor_invalid_path_is_machine_readable(tmp_path):
     result = run("doctor", tmp_path / "missing", "--json")
     assert result.returncode == 2
