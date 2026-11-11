@@ -66,6 +66,8 @@ def test_create_renders_names_metadata_and_answers(template_source, tmp_path, vi
     assert metadata["project"]["name"] == "weather-kit"
     assert metadata["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"] == ["src/weather_kit"]
     assert (target / "src/weather_kit/__init__.py").is_file()
+    assert "docs/HANDOFF.md" in (target / "AGENTS.md").read_text()
+    assert "No checks executed by scaffolding" in (target / "docs/HANDOFF.md").read_text()
     answers = yaml.safe_load((target / ".copier-answers.yml").read_text())
     assert answers["_commit"] == "v1.0.0"
     assert answers["project_name"] == "weather-kit"

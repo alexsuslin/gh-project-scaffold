@@ -15,7 +15,7 @@ uv run github-project-ops/scripts/scaffold.py create ../weather-kit --name weath
 
 From an installed skill, substitute the actual path to `scripts/scaffold.py`.
 Both commands use the latest tagged version of the GitHub template by default.
-For repeatable generation, add `--ref v0.2.0` once that release exists.
+For repeatable generation, add `--ref v0.3.0` once that release exists.
 
 Options:
 
@@ -76,7 +76,9 @@ hand; use native Copier `--data KEY=VALUE` when changing saved answers.
 The wrapper skips template tasks and does not enable unsafe extensions.
 It supports ordinary file updates; symbolic links and file/directory transitions
 can require manual handling. It does not migrate arbitrary existing repositories
-that lack Copier's saved baseline.
+that lack Copier's saved baseline. Use the separate additive `adopt` command for
+those repositories; see [project readiness](readiness.md). Adoption preserves the
+existing stack and records provenance without claiming Copier update compatibility.
 
 Exit codes: 0 success/preview; 2 invalid input, unsafe collision, or operational
 failure; 3 merge conflicts. Preview may clone/download a template and write to

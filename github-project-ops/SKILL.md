@@ -1,6 +1,6 @@
 ---
 name: github-project-ops
-description: Use when creating, auditing, maintaining, or releasing a GitHub-hosted software project and Codex needs Python-first repository scaffolding, README.md and contributor docs, CI/CD workflows, semantic versioning, branching, tagging, release notes, artifacts, AGENTS.md guidance, or XDG-aware project conventions.
+description: Create a Python project, inspect or adopt an existing repository, update its scaffold, or prepare a release. Use for repository setup and maintenance, not ordinary application edits.
 ---
 
 # Github Project Ops
@@ -25,7 +25,13 @@ Treat `public` or `private`, `python` or another stack, and `bootstrap`, `audit`
 Use for a new or nearly empty repository. For Python projects, use `scripts/scaffold.py create` and its `--preview` mode; read `references/generator.md`. The Copier templates in `assets/templates/` render names, ownership, licensing, and saved answers consistently. For other stacks, adapt the relevant conventions.
 
 ### Audit mode
-Use for an existing repository. Inspect current files first, identify missing or weak conventions, and patch incrementally instead of replacing working user-authored structure.
+Use for an existing repository. Read `references/readiness.md` and run
+`python scripts/scaffold.py doctor PATH --json` with the installed Python interpreter.
+This is read-only; candidate commands have not been executed. Inspect relevant
+findings before proposing changes. When onboarding is authorized, use
+`adopt PATH --preview` and then `adopt PATH`; preserve existing instructions and use
+`--handoff` to select an existing continuation document. Adoption does not create
+a Copier baseline or authorize publishing, deployment or changes to other projects.
 
 ### Release mode
 Use for version bumps, changelog updates, annotated tags, release notes, release artifacts, and GitHub release workflow updates.
@@ -37,11 +43,14 @@ Use for CI/CD upkeep, contributor-experience improvements, docs refreshes, and k
 
 1. Detect whether the request is `bootstrap`, `audit`, `release`, or `maintenance`.
 2. Inspect the repository before changing it.
-3. Read `references/repo-standards.md` for shared standards.
-4. Read `references/python-defaults.md` when the project is Python or the user has not specified another stack.
+3. Read `references/repo-standards.md` when changing shared repository conventions.
+4. Read `references/python-defaults.md` when creating or changing Python scaffolding.
 5. Read `references/github-actions.md` when touching CI/CD, releases, artifacts, or publication.
 6. For a Python bootstrap or generated-project update, follow `references/generator.md`. Preview changes first, then apply them within the user's request. Keep `.copier-answers.yml` in Git. Install, test, and build the result; do not copy raw `.jinja` inputs as finished project files.
 7. Preserve coherent existing conventions unless the user asks to standardize aggressively.
+8. For substantial work, agree on acceptance evidence and maintain one existing
+   handoff/context document. Distinguish implemented, verified, integrated and
+   deployed; state the next action without claiming unexecuted checks passed.
 
 ## Standard Outputs
 
@@ -72,6 +81,7 @@ Create `CODEOWNERS`, `LICENSE`, or packaging/release extras when they fit the re
 
 ## References
 
+- Read `references/readiness.md` for read-only diagnosis, additive adoption and handoff.
 - Read `references/repo-standards.md` for shared docs, branching, tagging, semver, release notes, artifacts, and XDG guidance.
 - Read `references/generator.md` for creation, isolated diff previews, saved answers, and conflict-safe updates.
 - Read `references/python-defaults.md` for `pyproject.toml`, `src/`, `pytest`, `ruff`, `mypy`, and packaging defaults.

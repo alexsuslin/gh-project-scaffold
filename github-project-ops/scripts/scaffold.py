@@ -2,7 +2,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["copier==9.18.2"]
 # ///
-"""Generate and update projects using Copier, with isolated diff previews."""
+"""Inspect, adopt, generate and update projects with reviewable previews."""
 
 from __future__ import annotations
 
@@ -17,9 +17,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-from copier import run_copy, run_update
-from copier.errors import UserMessageError
-from plumbum import ProcessExecutionError
+from project_readiness import adopt_project, doctor_project
 
 DEFAULT_SOURCE = "https://github.com/alexsuslin/gh-project-scaffold.git"
 
@@ -61,6 +59,8 @@ def show_created_files(rendered: Path) -> None:
 
 
 def create_project(args: argparse.Namespace) -> int:
+    from copier import run_copy
+
     require_empty_destination(args.destination)
     package_name = args.package or args.name.replace("-", "_").replace(".", "_")
     if not re.fullmatch(r"[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*", args.name):
@@ -146,6 +146,8 @@ def apply_preview(destination: Path, preview: Path, changed: list[str]) -> None:
 
 
 def update_project(args: argparse.Namespace) -> int:
+    from copier import run_update
+
     require_clean_project(args.destination)
     original_head = git(args.destination, "rev-parse", "HEAD").strip()
     with tempfile.TemporaryDirectory(prefix="scaffold-update-") as temporary:
@@ -204,12 +206,33 @@ def update_project(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_copier_command(args: argparse.Namespace) -> int:
+    # doctor/adopt work offline with the standard library, including when invoked
+    # with python -S. Only generation and template updates need Copier.
+    from copier.errors import UserMessageError
+    from plumbum import ProcessExecutionError
+
+    try:
+        return create_project(args) if args.command == "create" else update_project(args)
+    except (UserMessageError, ProcessExecutionError) as error:
+        raise ValueError(str(error)) from error
+
+
 def main() -> int:
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    doctor = commands.add_parser("doctor", help="Inspect a project without running its code")
+    doctor.add_argument("destination", type=Path)
+    doctor.add_argument("--json", action="store_true", help="Print a versioned JSON report")
+    adopt = commands.add_parser("adopt", help="Add agent guidance without replacing existing files")
+    adopt.add_argument("destination", type=Path)
+    adopt.add_argument("--preview", action="store_true", help="Show additions without writing")
+    adopt.add_argument(
+        "--handoff", default=None, help="Existing Markdown context file, relative to the Git root"
+    )
     create = commands.add_parser("create", help="Create a project, or preview its files")
     create.add_argument("destination", type=Path)
     create.add_argument("--name", required=True, help="Distribution name, e.g. weather-kit")
@@ -233,8 +256,12 @@ def main() -> int:
     )
     args = parser.parse_args()
     try:
-        return create_project(args) if args.command == "create" else update_project(args)
-    except (OSError, ValueError, UserMessageError, ProcessExecutionError) as error:
+        if args.command == "doctor":
+            return doctor_project(args.destination, as_json=args.json)
+        if args.command == "adopt":
+            return adopt_project(args.destination, preview=args.preview, handoff=args.handoff)
+        return run_copier_command(args)
+    except (OSError, ValueError, ImportError, subprocess.TimeoutExpired) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2
 

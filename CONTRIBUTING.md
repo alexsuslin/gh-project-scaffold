@@ -2,6 +2,8 @@
 
 Use Python 3.11+ and uv. Install the development environment with
 `uv sync --locked`. The validator uses only the standard library; the generator uses Copier.
+Doctor and adopt also use only the standard library and Git. Their CLI tests run
+with `python -S` so an accidental third-party dependency cannot go unnoticed.
 
 Before opening a pull request, run:
 
@@ -14,6 +16,10 @@ uv run --locked pytest
 
 Use `uv run ruff format .` to apply formatting. To update dependencies, run
 `uv lock --upgrade`, rerun the checks, and include `uv.lock` in the change.
+
+On Windows, if an entry-point executable is blocked but the environment's Python
+is allowed, use `.venv/Scripts/python.exe -m pytest` (and `-m ruff` / `-m mypy`).
+Keep OS protection enabled; report genuinely unavailable checks instead of bypassing it.
 
 Tests build the Python template into a source distribution and wheel, install
 the wheel in an isolated environment, and import it outside the source checkout.

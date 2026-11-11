@@ -6,16 +6,16 @@ do not publish a Python package or upload anything to PyPI.
 ## Build locally
 
 `VERSION` is the release source of truth and must contain a stable SemVer value
-such as `0.2.0`. The tag passed to the builder must be that version prefixed
+such as `0.3.0`. The tag passed to the builder must be that version prefixed
 with `v`.
 
 ```sh
-uv run --locked python scripts/build_release.py --tag v0.2.0 --output-dir dist
+uv run --locked python scripts/build_release.py --tag v0.3.0 --output-dir dist
 ```
 
 The command creates:
 
-- `dist/github-project-ops-v0.2.0.zip`
+- `dist/github-project-ops-v0.3.0.zip`
 - `dist/SHA256SUMS`
 
 The ZIP contains the repository `LICENSE`, `VERSION`, and `copier.yml`, plus
@@ -46,7 +46,7 @@ Verify it in PowerShell:
 
 ```powershell
 $expected = (Get-Content .\dist\SHA256SUMS).Split()[0]
-$actual = (Get-FileHash .\dist\github-project-ops-v0.2.0.zip -Algorithm SHA256).Hash.ToLower()
+$actual = (Get-FileHash .\dist\github-project-ops-v0.3.0.zip -Algorithm SHA256).Hash.ToLower()
 if ($actual -ne $expected) { throw "Release checksum mismatch" }
 ```
 
@@ -58,8 +58,8 @@ release, create the repository's required signed tag for that exact commit, and
 push the tag:
 
 ```sh
-git tag -s v0.2.0
-git push origin v0.2.0
+git tag -s v0.3.0
+git push origin v0.3.0
 ```
 
 A pushed `v*` tag starts `.github/workflows/release.yml`. The build job checks
@@ -70,7 +70,7 @@ the ZIP and checksum to the publish job. The publish job alone receives
 `gh release create --verify-tag`.
 
 The workflow can also be started manually with an existing tag through
-`workflow_dispatch`. Enter the complete tag, such as `v0.2.0`; the same commit
+`workflow_dispatch`. Enter the complete tag, such as `v0.3.0`; the same commit
 and version checks apply.
 
 Published releases are immutable in this workflow. If a GitHub Release already

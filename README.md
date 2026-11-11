@@ -1,11 +1,14 @@
 # gh-project-scaffold
 
-A Codex skill and Copier-based generator for GitHub-ready Python projects.
+A project-readiness CLI, Codex skill and Copier generator for GitHub-ready Python projects.
 Create a project with a diff preview, then bring later template improvements into
 it without overwriting local work silently.
 
 ## Features
 
+- Read-only `doctor` with text/JSON reports for existing projects and worktrees.
+- Additive `adopt --preview`, preserving existing instructions and context files.
+- Concrete `AGENTS.md` entry points and a handoff separating implementation, verification and delivery.
 - `create --preview`: see the generated files before writing anything.
 - `update --preview`: calculate a three-way template update in an isolated clone.
 - Saved names, ownership, visibility, license, and template revision in `.copier-answers.yml`.
@@ -14,6 +17,36 @@ it without overwriting local work silently.
 - Standalone structural validator with JSON output and a non-Python profile.
 - Versioned skill ZIPs and checksums published through GitHub Releases.
 - MIT license.
+
+## Inspect and adopt an existing project
+
+Requires Python 3.11+ and Git; these two commands need no Python dependencies or
+network access. Use your installed Python interpreter (on Windows, an explicit
+path may be needed instead of the WindowsApps alias).
+
+```sh
+python github-project-ops/scripts/scaffold.py doctor path/to/project --json
+python github-project-ops/scripts/scaffold.py adopt path/to/project --preview
+python github-project-ops/scripts/scaffold.py adopt path/to/project
+```
+
+`doctor` discovers the Git root, branch, working changes, worktrees, stack markers,
+candidate commands, instruction files and handoff. It does not execute project code,
+install packages, contact remotes or claim that checks passed. Exit codes: 0 no
+warnings/errors, 1 findings to review, 2 invalid input or operational failure.
+
+`adopt` targets an existing Git root, including one with uncommitted work. It adds
+missing `AGENTS.md`, `docs/HANDOFF.md` and a `.scaffold.json` provenance manifest.
+Existing files are preserved, including `AGENTS.override.md`. For an existing
+context document use `--handoff docs/CONTEXT.md` on the first adoption. Review any
+existing instructions for a link to that document; they are not automatically edited.
+Repeated adoption is a no-op, including after you edit the new files.
+
+This is additive onboarding, not a Copier migration. It does not create
+`.copier-answers.yml` or enable Copier `update` for an unrelated project. Record
+the real goal and evidence in the handoff after adoption. See the
+[readiness guide](github-project-ops/references/readiness.md) for discovery limits,
+JSON fields, path safety and recovery.
 
 ## Create a project
 
@@ -77,8 +110,8 @@ Use your configured `CODEX_HOME/skills` when different. Example request:
 > Use $github-project-ops to create a public Python library with a preview first.
 
 The skill also audits existing repositories and adapts to other stacks. The
-generator itself currently targets Python. It does not adopt arbitrary existing
-projects into Copier automatically.
+Copier generator itself currently targets Python. `adopt` adds guidance to other
+stacks without converting their structure or creating a Copier baseline.
 
 ## Validate a project
 

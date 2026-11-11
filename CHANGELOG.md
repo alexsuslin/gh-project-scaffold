@@ -1,6 +1,18 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 — 2026-11-11
+
+### Added
+
+- Read-only `doctor` with versioned JSON, Git/worktree inventory, bounded stack and
+  command discovery, and actionable instruction/handoff findings.
+- Additive `adopt --preview` with an independent provenance manifest, existing
+  context selection, idempotence and protection for user files and linked paths.
+- Concrete generated `AGENTS.md` and a shared handoff template separating
+  implementation, verification, integration and deployment.
+- Offline standard-library operation for doctor/adopt, without importing Copier.
+
+## 0.2.0
 
 ### Added
 
