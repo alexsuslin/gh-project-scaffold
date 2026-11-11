@@ -1,6 +1,6 @@
 [project]
 name = "gh-project-scaffold-dev"
-version = "0.3.3"
+version = "0.3.4"
 requires-python = ">=3.11"
 
 [dependency-groups]

@@ -5,10 +5,9 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 ## Outcome and acceptance
 
-- Current goal: use the README's npm setup command in doctor after the Jev Advisor pilot.
-- Acceptance: report `npm ci --ignore-scripts` as an unverified candidate when
-  the root README documents that exact npm command. Verify the fallback and
-  read-only behavior on synthetic fixtures.
+- Current goal: release v0.3.4 with README-aware npm setup discovery.
+- Acceptance: align version metadata, verify the packaged doctor on an npm
+  fixture, and confirm main CI and publication for the signed release commit.
 - Scope: project-scaffolding and synthetic fixtures only.
 
 ## Current state
@@ -25,6 +24,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Verified published archive: `dist/v0.3.1-published/`.
 - Verified v0.3.2 archive: `dist/v0.3.2-published/`.
 - Verified v0.3.3 archive: `dist/v0.3.3-published/`.
+- v0.3.4 release candidate archive: `dist/v0.3.4/`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
@@ -36,13 +36,16 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Erase Garden follow-up: `bc89419` added discovery for the check script in both
   supported Godot layouts. Main CI passed on Windows and Ubuntu with Python 3.11
   and 3.14. The change was published in v0.3.3.
-- Jev Advisor follow-up: doctor now prefers the fixed, documented npm invocation.
-  Adopt previews use the same candidate when generating instructions.
+- Jev Advisor follow-up: `aafeb4d` added recognition of the documented npm command
+  in doctor and adopt previews. Main CI passed on Windows and Ubuntu with Python
+  3.11 and 3.14. The owner authorized releasing this change as v0.3.4.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| v0.3.4 release candidate | Full pytest, Windows Python 3.14 | 87 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
+| v0.3.4 release candidate | Lockfile, Ruff, Mypy and local archive | Passed | `uv lock --check --offline`. Archive matched SHA256SUMS and extracted doctor reported the README npm candidate. |
 | README npm discovery | Readiness suite, Windows Python 3.14 | 38 passed, 1 skipped | `tmp-test-runs/doctor-npm-readme-green`. Fenced and inline commands, fallback and preview passed. Symlink creation unavailable. |
 | README npm discovery | Ruff lint/format and mypy | Passed | Repository quality checks. |
 | v0.3.3 release candidate | Full pytest, Windows Python 3.14 | 81 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
@@ -75,4 +78,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action: verify main CI for the README npm discovery commit authorized for push.
+- Next action: verify main CI and the published v0.3.4 assets after pushing the signed tag.

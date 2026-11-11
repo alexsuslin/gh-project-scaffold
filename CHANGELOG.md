@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.4 — 2026-11-11
+
+### Changed
+
+- For npm projects, `doctor` prefers `npm ci --ignore-scripts` when the root
+  `README.md` documents that exact command. Adopt previews use the same setup
+  candidate. The default remains `npm ci` when the command is absent.
+- Jev Advisor-shaped fixtures cover standalone and inline commands, fallback,
+  and read-only behavior.
+
 ## 0.3.3 — 2026-11-11
 
 ### Added
