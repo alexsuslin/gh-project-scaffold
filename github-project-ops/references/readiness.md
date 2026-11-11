@@ -40,6 +40,15 @@ suggests `mypy .` when no targets are configured. Pyright uses its configured sc
 For a Python project, an exact `python312 -m mypy src` command on its own line
 or in inline code in the root `README.md` takes precedence over the inferred
 Mypy command. Doctor does not verify that the `python312` executable is available.
+If a Python project's root README documents the following two consecutive lines,
+doctor suggests the Paper Lab PowerShell check as a single command, including
+its `PYTHONPATH` setup. Otherwise, test discovery uses the pytest configuration.
+
+```powershell
+$env:PYTHONPATH = 'src'
+& '.\.venv-paper\Scripts\python.exe' -m unittest discover -s tests -q
+```
+
 Node candidates require exactly one recognized npm/pnpm/Yarn lockfile and known
 script names. For npm, an exact `npm ci --ignore-scripts` command on its own line
 or in inline code in the root `README.md` replaces the default `npm ci` candidate.

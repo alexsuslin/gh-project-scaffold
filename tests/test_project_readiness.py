@@ -11,6 +11,7 @@ from test_generator import snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "github-project-ops/scripts/scaffold.py"
+PAPER_LAB_UNITTEST = r"& '.\.venv-paper\Scripts\python.exe' -m unittest discover -s tests -q"
 
 
 def run(*arguments):
@@ -346,6 +347,54 @@ def test_doctor_requires_godot_marker_and_regular_check_script(repository, has_g
     report = json.loads(run("doctor", repository, "--json").stdout)
     assert report["commands"] == []
     assert "commands_unknown" in {item["code"] for item in report["findings"]}
+
+
+def test_doctor_reports_documented_paper_lab_check(repository):
+    (repository / "pyproject.toml").write_text('[project]\nname = "paper-lab-fixture"\n')
+    setup = "$env:PYTHONPATH = 'src'"
+    (repository / "README.md").write_text(
+        f"# Paper Lab fixture\n\n```powershell\n{setup}\n{PAPER_LAB_UNITTEST}\n"
+        "# unrelated command with private-fixture arguments\n```\n",
+        encoding="utf-8",
+    )
+    git(repository, "add", "application.txt")
+    index = (repository / ".git/index").read_bytes()
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    expected = f"{setup}; {PAPER_LAB_UNITTEST}"
+    assert report["commands"] == [
+        {"name": "test", "command": expected, "source": "README.md", "verified": False}
+    ]
+    assert "commands_unknown" not in {item["code"] for item in report["findings"]}
+    assert report["checks_executed"] is False
+    assert "private-fixture" not in result.stdout
+    preview = run("adopt", repository, "--preview")
+    assert preview.returncode == 0, preview.stderr
+    assert f"test: `{expected}`" in preview.stdout
+    assert snapshot(repository) == before
+    assert (repository / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize(
+    "readme",
+    [
+        PAPER_LAB_UNITTEST,
+        f"$env:PYTHONPATH = 'private'\n{PAPER_LAB_UNITTEST}",
+        f"$env:PYTHONPATH = 'src'\n{PAPER_LAB_UNITTEST}; Write-Output private-fixture",
+    ],
+    ids=["missing-pythonpath", "different-pythonpath", "chained-command"],
+)
+def test_doctor_does_not_infer_paper_lab_check_from_partial_match(repository, readme):
+    (repository / "pyproject.toml").write_text("[tool.pytest.ini_options]\n")
+    (repository / "README.md").write_text(f"```powershell\n{readme}\n```\n", encoding="utf-8")
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert [item["command"] for item in report["commands"]] == ["python -m pytest"]
+    assert "private-fixture" not in result.stdout
 
 
 def test_doctor_invalid_path_is_machine_readable(tmp_path):

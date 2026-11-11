@@ -5,16 +5,17 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 ## Outcome and acceptance
 
-- Current goal: release v0.3.5 with README-aware Mypy command discovery.
-- Acceptance: align version metadata, verify the packaged doctor on a Python
-  fixture, and confirm main CI and publication for the signed release commit.
+- Current goal: discover the documented Paper Lab offline check in doctor.
+- Acceptance: suggest the fixed PowerShell invocation with its `PYTHONPATH`
+  setup when both README lines match, preserve the pytest fallback, and verify
+  the behavior on synthetic fixtures.
 - Scope: project-scaffolding and synthetic fixtures only.
 
 ## Current state
 
 - Last substantive update: 2026-11-11.
-- Published baseline: [v0.3.4](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.4)
-  at `2c68cc6`. Main and tag CI and the release workflow passed.
+- Published baseline: [v0.3.5](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.5)
+  at `cca85e4`. Main and tag CI and the release workflow passed.
 - Implemented: doctor text/JSON reports; offline additive adoption; provenance manifest;
   existing guidance/context preservation; shared handoff template; Python starter guidance.
 - Verified: CLI behavior on disposable repositories/worktrees, existing generator tests,
@@ -25,7 +26,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Verified v0.3.2 archive: `dist/v0.3.2-published/`.
 - Verified v0.3.3 archive: `dist/v0.3.3-published/`.
 - Verified v0.3.4 archive: `dist/v0.3.4-published/`.
-- v0.3.5 release candidate archive: `dist/v0.3.5/`.
+- Verified v0.3.5 archive: `dist/v0.3.5-published/`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
@@ -42,12 +43,16 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
   3.11 and 3.14. The change was published in v0.3.4.
 - Teo-tales follow-up: `afa0a19` added recognition of the documented Mypy command
   in doctor and adopt previews. Main CI passed on Windows and Ubuntu with Python
-  3.11 and 3.14. The owner authorized releasing this change as v0.3.5.
+  3.11 and 3.14. The change was published in v0.3.5.
+- Paper Lab follow-up: the local doctor recognizes the exact two-line setup and
+  offline test command. Adopt preview includes the same unverified candidate.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| README Paper Lab discovery | Readiness suite, Windows Python 3.14 | 45 passed, 1 skipped | `tmp-test-runs/doctor-paper-lab-green`. Exact match, partial matches, fallback, preview and prior README candidates checked. Symlink creation unavailable. |
+| README Paper Lab discovery | Ruff lint/format and mypy | Passed | Repository quality checks. |
 | v0.3.5 release candidate | Full pytest, Windows Python 3.14 | 90 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.5 release candidate | Lockfile, Ruff, Mypy and local archive | Passed | `uv lock --check --offline`. Archive matched SHA256SUMS and extracted doctor reported the documented Mypy command. |
 | README Mypy discovery | Readiness suite, Windows Python 3.14 | 41 passed, 1 skipped | `tmp-test-runs/doctor-mypy-readme-green`. Teo-tales layout, fallback, preview and npm regressions passed. Symlink creation unavailable. |
@@ -86,4 +91,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action: verify main CI and the published v0.3.5 assets after pushing the signed tag.
+- Next action: verify main CI for the Paper Lab discovery commit authorized for push.

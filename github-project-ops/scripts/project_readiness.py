@@ -160,10 +160,15 @@ def readme_documents_command(root: Path, command: str) -> bool:
     except (OSError, ValueError):
         return False
 
-    invocation = r"[ \t]+".join(re.escape(part) for part in command.split())
+    lines = [
+        r"[ \t]+".join(re.escape(part) for part in line.split()) for line in command.splitlines()
+    ]
+    invocation = r"[ \t]*\r?\n[ \t]*".join(lines)
     standalone = rf"^[ \t]*{invocation}[ \t]*\r?$"
-    inline_code = rf"(?<!`)`[ \t]*{invocation}[ \t]*`(?!`)"
-    return re.search(f"{standalone}|{inline_code}", readme, re.MULTILINE) is not None
+    if len(lines) == 1:
+        inline_code = rf"(?<!`)`[ \t]*{invocation}[ \t]*`(?!`)"
+        standalone = f"{standalone}|{inline_code}"
+    return re.search(standalone, readme, re.MULTILINE) is not None
 
 
 def inspect_project(destination: Path) -> dict[str, Any]:
@@ -222,7 +227,13 @@ def inspect_project(destination: Path) -> dict[str, Any]:
                 raise TypeError("Invalid tool configuration")
             # Infer only from explicit configuration, not installed executables.
             prefix = "uv run --locked" if (root / "uv.lock").is_file() else "python -m"
-            if "pytest" in config:
+            paper_lab_check = (
+                "$env:PYTHONPATH = 'src'\n"
+                r"& '.\.venv-paper\Scripts\python.exe' -m unittest discover -s tests -q"
+            )
+            if readme_documents_command(root, paper_lab_check):
+                command("test", "; ".join(paper_lab_check.splitlines()), "README.md")
+            elif "pytest" in config:
                 command("test", f"{prefix} pytest", "pyproject.toml [tool.pytest]")
             if "ruff" in config:
                 command("lint", f"{prefix} ruff check .", "pyproject.toml [tool.ruff]")
