@@ -14,7 +14,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import quote
 
-SCAFFOLD_VERSION = "0.3.4"
+SCAFFOLD_VERSION = "0.3.5"
 MANIFEST = ".scaffold.json"
 DEFAULT_HANDOFF = "docs/HANDOFF.md"
 MAX_FILE_BYTES = 1_048_576

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.5 — 2026-11-11
+
+### Changed
+
+- For Python projects, `doctor` prefers `python312 -m mypy src` when the root
+  `README.md` documents that exact command. Adopt previews use the same candidate.
+  Mypy discovery falls back to `pyproject.toml` when the command is absent.
+- Teo-tales-shaped fixtures cover inline and standalone commands, fallback, and
+  read-only behavior.
+
 ## 0.3.4 — 2026-11-11
 
 ### Changed
