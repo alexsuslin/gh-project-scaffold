@@ -61,6 +61,66 @@ def test_doctor_discovers_commands_without_executing_scripts_or_modifying_git(re
     assert (repository / ".git/index").read_bytes() == index
 
 
+@pytest.mark.parametrize(
+    "instructions",
+    [
+        "~~~powershell\nnpm ci --ignore-scripts\nnpm run check\nnpm test\n~~~\n",
+        "Install with `npm ci --ignore-scripts` before running checks.\n",
+    ],
+    ids=["jev-advisor-fenced-setup", "inline-setup"],
+)
+def test_doctor_prefers_documented_npm_ci_without_running_it(repository, instructions):
+    (repository / "package.json").write_text('{"scripts":{"test":"node --test"}}')
+    (repository / "package-lock.json").write_text("{}")
+    (repository / "README.md").write_text(f"# Fixture\n\n{instructions}", encoding="utf-8")
+    git(repository, "add", "application.txt")
+    index = (repository / ".git/index").read_bytes()
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert [item for item in report["commands"] if item["name"] == "bootstrap"] == [
+        {
+            "name": "bootstrap",
+            "command": "npm ci --ignore-scripts",
+            "source": "README.md",
+            "verified": False,
+        }
+    ]
+    assert report["checks_executed"] is False
+    preview = run("adopt", repository, "--preview")
+    assert preview.returncode == 0, preview.stderr
+    assert "bootstrap: `npm ci --ignore-scripts`" in preview.stdout
+    assert snapshot(repository) == before
+    assert (repository / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize(
+    "instructions",
+    [
+        None,
+        "Run npm ci --ignore-scripts only if needed.\n",
+        "`npm ci --ignore-scripts=false`\n",
+        "npm ci --ignore-scripts && echo private-command\n",
+    ],
+    ids=["missing-readme", "prose", "different-option", "chained-command"],
+)
+def test_doctor_keeps_npm_ci_without_an_exact_documented_command(repository, instructions):
+    (repository / "package.json").write_text("{}")
+    (repository / "package-lock.json").write_text("{}")
+    if instructions is not None:
+        (repository / "README.md").write_text(instructions, encoding="utf-8")
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["commands"] == [
+        {"name": "bootstrap", "command": "npm ci", "source": "package-lock.json", "verified": False}
+    ]
+    assert "private-command" not in result.stdout
+
+
 def test_doctor_reports_actual_root_and_nested_repository(repository, monkeypatch):
     child = repository / "src"
     child.mkdir()

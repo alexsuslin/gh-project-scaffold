@@ -38,7 +38,9 @@ Python check candidates come from pytest, Ruff, Mypy and Pyright configuration i
 `python -m`. Mypy uses configured `files`, `modules` or `packages` when present and
 suggests `mypy .` when no targets are configured. Pyright uses its configured scope.
 Node candidates require exactly one recognized npm/pnpm/Yarn lockfile and known
-script names.
+script names. For npm, an exact `npm ci --ignore-scripts` command on its own line
+or in inline code in the root `README.md` replaces the default `npm ci` candidate.
+Doctor reports only the fixed command and the README filename as evidence.
 For .NET, doctor suggests `pwsh -File ./build-web.ps1` when that script is a
 regular file at the root. It suggests `dotnet run --project` for `*.Tests.csproj`
 files in the bounded scan with one explicit, unconditional `OutputType=Exe`.

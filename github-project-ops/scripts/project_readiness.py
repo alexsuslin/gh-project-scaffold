@@ -154,6 +154,18 @@ def executable_dotnet_test(root: Path, project_file: str) -> bool:
     )
 
 
+def readme_documents_npm_ci_without_scripts(root: Path) -> bool:
+    try:
+        readme = read_text(root, "README.md")
+    except (OSError, ValueError):
+        return False
+
+    invocation = r"npm[ \t]+ci[ \t]+--ignore-scripts"
+    standalone = rf"^[ \t]*{invocation}[ \t]*\r?$"
+    inline_code = rf"(?<!`)`[ \t]*{invocation}[ \t]*`(?!`)"
+    return re.search(f"{standalone}|{inline_code}", readme, re.MULTILINE) is not None
+
+
 def inspect_project(destination: Path) -> dict[str, Any]:
     requested = existing_directory(destination)
     root = requested
@@ -258,7 +270,10 @@ def inspect_project(destination: Path) -> dict[str, Any]:
                     if isinstance(package.get("scripts", {}).get(name), str):
                         command(name, f"{manager} run {name}", f"package.json scripts.{name}")
                 if manager == "npm":
-                    command("bootstrap", "npm ci", "package-lock.json")
+                    if readme_documents_npm_ci_without_scripts(root):
+                        command("bootstrap", "npm ci --ignore-scripts", "README.md")
+                    else:
+                        command("bootstrap", "npm ci", "package-lock.json")
         except (OSError, ValueError, TypeError) as error:
             finding(
                 "invalid_node_metadata", f"Cannot inspect package.json ({type(error).__name__})."
