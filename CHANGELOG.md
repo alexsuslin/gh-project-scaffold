@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.2 — 2026-11-11
+
+### Added
+
+- In .NET repositories, `doctor` suggests `pwsh -File ./build-web.ps1` when the
+  root script exists and `dotnet run --project` for `*.Tests.csproj` files with
+  an explicit, unconditional `OutputType=Exe` in the bounded project scan.
+- KidPic-shaped regression fixtures cover discovery, ambiguous project metadata,
+  and read-only behavior. The suggested commands remain unverified.
+
 ## 0.3.1 — 2026-11-11
 
 ### Added

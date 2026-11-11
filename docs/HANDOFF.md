@@ -5,9 +5,9 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 ## Outcome and acceptance
 
-- Current goal: add .NET build and executable test command discovery after the KidPic pilot.
-- Acceptance: report unverified candidates for a root `build-web.ps1` and an explicit
-  executable `*.Tests.csproj`, with read-only fixture coverage and no changes to KidPic.
+- Current goal: release v0.3.2 with .NET build and executable test command discovery.
+- Acceptance: align version metadata, verify the packaged doctor on a KidPic-shaped
+  fixture, and confirm main CI and publication for the signed release commit.
 - Scope: project-scaffolding and synthetic fixtures only.
 
 ## Current state
@@ -22,19 +22,22 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Release delivery: [v0.3.0](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.0)
   was published on 2026-11-11.
 - Verified published archive: `dist/v0.3.1-published/`.
+- v0.3.2 release candidate archive: `dist/v0.3.2/`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
   The follow-up was pushed as `0aa2d0d` and passed main CI on Windows and Ubuntu
   with Python 3.11 and 3.14.
-- KidPic follow-up: doctor now discovers the root web build script and executable
-  test projects in its existing shallow .NET scan. The owner authorized committing
-  and pushing this follow-up to main. Verify delivery using the CI run for this commit.
+- KidPic follow-up: `50f6b7a` added discovery for the root web build script and
+  executable test projects. Main CI passed on Windows and Ubuntu with Python 3.11
+  and 3.14. The owner authorized releasing this change as v0.3.2.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| v0.3.2 release candidate | Full pytest, Windows Python 3.14 | 77 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
+| v0.3.2 release candidate | Lockfile, Ruff, Mypy and local archive | Passed | `uv lock --check --offline`. Archive matched SHA256SUMS and extracted doctor reported both .NET candidates. |
 | KidPic discovery working changes | Readiness suite, Windows Python 3.14 | 28 passed, 1 skipped | `tmp-test-runs/doctor-dotnet-green`. KidPic-shaped and ambiguous .NET fixtures passed. Symlink creation unavailable. |
 | KidPic discovery working changes | Ruff lint/format and mypy | Passed | Repository quality checks. |
 | v0.3.1 release candidate | Full pytest, Windows Python 3.14 | 75 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
@@ -59,4 +62,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action: verify main CI for the .NET discovery commit.
+- Next action: verify main CI and the published v0.3.2 assets after pushing the signed tag.
