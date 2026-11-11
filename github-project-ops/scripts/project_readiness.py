@@ -154,13 +154,13 @@ def executable_dotnet_test(root: Path, project_file: str) -> bool:
     )
 
 
-def readme_documents_npm_ci_without_scripts(root: Path) -> bool:
+def readme_documents_command(root: Path, command: str) -> bool:
     try:
         readme = read_text(root, "README.md")
     except (OSError, ValueError):
         return False
 
-    invocation = r"npm[ \t]+ci[ \t]+--ignore-scripts"
+    invocation = r"[ \t]+".join(re.escape(part) for part in command.split())
     standalone = rf"^[ \t]*{invocation}[ \t]*\r?$"
     inline_code = rf"(?<!`)`[ \t]*{invocation}[ \t]*`(?!`)"
     return re.search(f"{standalone}|{inline_code}", readme, re.MULTILINE) is not None
@@ -230,7 +230,10 @@ def inspect_project(destination: Path) -> dict[str, Any]:
                     "format-check", f"{prefix} ruff format --check .", "pyproject.toml [tool.ruff]"
                 )
             mypy = config.get("mypy")
-            if isinstance(mypy, dict):
+            documented_mypy = "python312 -m mypy src"
+            if readme_documents_command(root, documented_mypy):
+                command("mypy", documented_mypy, "README.md")
+            elif isinstance(mypy, dict):
                 # Let mypy resolve configured targets without copying them into a shell command.
                 has_targets = any(mypy.get(key) for key in ("files", "modules", "packages"))
                 target = "" if has_targets else " ."
@@ -270,8 +273,9 @@ def inspect_project(destination: Path) -> dict[str, Any]:
                     if isinstance(package.get("scripts", {}).get(name), str):
                         command(name, f"{manager} run {name}", f"package.json scripts.{name}")
                 if manager == "npm":
-                    if readme_documents_npm_ci_without_scripts(root):
-                        command("bootstrap", "npm ci --ignore-scripts", "README.md")
+                    documented_npm = "npm ci --ignore-scripts"
+                    if readme_documents_command(root, documented_npm):
+                        command("bootstrap", documented_npm, "README.md")
                     else:
                         command("bootstrap", "npm ci", "package-lock.json")
         except (OSError, ValueError, TypeError) as error:

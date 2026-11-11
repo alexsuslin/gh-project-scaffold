@@ -206,6 +206,54 @@ def test_doctor_does_not_suggest_running_ambiguous_dotnet_projects(repository):
 
 
 @pytest.mark.parametrize(
+    ("readme", "expected", "source"),
+    [
+        pytest.param(
+            "## Development\n\n- `python312 -m mypy src`\n",
+            "python312 -m mypy src",
+            "README.md",
+            id="teo-tales-readme",
+        ),
+        pytest.param(
+            "```powershell\npython312 -m mypy src\n```\n",
+            "python312 -m mypy src",
+            "README.md",
+            id="standalone-command",
+        ),
+        pytest.param(
+            "`python312 -m mypy src/tests`\npython312 -m mypy src && echo private-command\n",
+            "python -m mypy .",
+            "pyproject.toml [tool.mypy]",
+            id="nonmatching-commands",
+        ),
+    ],
+)
+def test_doctor_prefers_documented_mypy_command(repository, readme, expected, source):
+    (repository / "pyproject.toml").write_text(
+        '[tool.mypy]\npython_version = "3.12"\nstrict = true\nmypy_path = ["src"]\n',
+        encoding="utf-8",
+    )
+    (repository / "README.md").write_text(readme, encoding="utf-8")
+    git(repository, "add", "application.txt")
+    index = (repository / ".git/index").read_bytes()
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["commands"] == [
+        {"name": "mypy", "command": expected, "source": source, "verified": False}
+    ]
+    assert report["checks_executed"] is False
+    assert "private-command" not in result.stdout
+    preview = run("adopt", repository, "--preview")
+    assert preview.returncode == 0, preview.stderr
+    assert f"mypy: `{expected}`" in preview.stdout
+    assert snapshot(repository) == before
+    assert (repository / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize(
     ("tool", "configuration", "locked", "expected"),
     [
         pytest.param(

@@ -37,6 +37,9 @@ Python check candidates come from pytest, Ruff, Mypy and Pyright configuration i
 `pyproject.toml`. A root `uv.lock` selects `uv run --locked`; otherwise candidates use
 `python -m`. Mypy uses configured `files`, `modules` or `packages` when present and
 suggests `mypy .` when no targets are configured. Pyright uses its configured scope.
+For a Python project, an exact `python312 -m mypy src` command on its own line
+or in inline code in the root `README.md` takes precedence over the inferred
+Mypy command. Doctor does not verify that the `python312` executable is available.
 Node candidates require exactly one recognized npm/pnpm/Yarn lockfile and known
 script names. For npm, an exact `npm ci --ignore-scripts` command on its own line
 or in inline code in the root `README.md` replaces the default `npm ci` candidate.
