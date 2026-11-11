@@ -87,6 +87,64 @@ def test_doctor_detects_mixed_stack_and_bad_metadata(repository):
     assert "invalid_node_metadata" in {f["code"] for f in report["findings"]}
 
 
+def test_doctor_reports_kidpic_build_and_executable_tests(repository):
+    (repository / "build-web.ps1").write_text("'ran' | Set-Content EXECUTED\n")
+    (repository / "KidPic.Tests").mkdir()
+    (repository / "KidPic.Tests/KidPic.Tests.csproj").write_text(
+        '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType>'
+        "<TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>"
+    )
+    git(repository, "add", "application.txt")
+    index = (repository / ".git/index").read_bytes()
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr  # Fixture has no commit, guidance or handoff.
+    report = json.loads(result.stdout)
+    assert report["stacks"] == ["dotnet"]
+    assert report["commands"] == [
+        {
+            "name": "build",
+            "command": "pwsh -File ./build-web.ps1",
+            "source": "build-web.ps1",
+            "verified": False,
+        },
+        {
+            "name": "test",
+            "command": "dotnet run --project ./KidPic.Tests/KidPic.Tests.csproj",
+            "source": "KidPic.Tests/KidPic.Tests.csproj [OutputType=Exe]",
+            "verified": False,
+        },
+    ]
+    assert "commands_unknown" not in {item["code"] for item in report["findings"]}
+    assert report["checks_executed"] is False
+    assert snapshot(repository) == before
+    assert (repository / ".git/index").read_bytes() == index
+
+
+def test_doctor_does_not_suggest_running_ambiguous_dotnet_projects(repository):
+    (repository / "build-web.ps1").mkdir()
+    executable = "<Project><PropertyGroup><OutputType>Exe</OutputType></PropertyGroup></Project>"
+    projects = {
+        "KidPic.Web.csproj": executable,
+        "Unsafe&Name.Tests.csproj": executable,
+        "Library.Tests.csproj": executable.replace("Exe", "Library"),
+        "Conditional.Tests.csproj": executable.replace(
+            "<PropertyGroup>", '<PropertyGroup Condition="$(Configuration) == Release">'
+        ),
+        "Broken.Tests.csproj": "<Project><PropertyGroup><OutputType>Exe</OutputType>",
+    }
+    for name, contents in projects.items():
+        (repository / name).write_text(contents)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["stacks"] == ["dotnet"]
+    assert report["commands"] == []
+    assert "commands_unknown" in {item["code"] for item in report["findings"]}
+
+
 @pytest.mark.parametrize(
     ("tool", "configuration", "locked", "expected"),
     [

@@ -5,9 +5,11 @@ from __future__ import annotations
 import difflib
 import hashlib
 import json
+import re
 import stat
 import subprocess
 import tomllib
+import xml.etree.ElementTree as ET
 from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import quote
@@ -125,6 +127,31 @@ def validate_handoff(root: Path, name: str) -> Path:
     if any(part.startswith(".") for part in PurePosixPath(name).parts):
         raise ValueError("Handoff must not be inside a hidden directory")
     return path
+
+
+def executable_dotnet_test(root: Path, project_file: str) -> bool:
+    try:
+        text = read_text(root, project_file)
+        if "<!DOCTYPE" in text:
+            return False
+        project = ET.fromstring(text)
+    except (OSError, ValueError, ET.ParseError):
+        return False
+
+    if project.tag.rsplit("}", 1)[-1] != "Project":
+        return False
+    outputs = project.findall(".//{*}OutputType")
+    if len(outputs) != 1:
+        return False
+    output = outputs[0]
+    return (
+        (output.text or "").strip().casefold() == "exe"
+        and "Condition" not in output.attrib
+        and any(
+            "Condition" not in group.attrib and group.find("{*}OutputType") is output
+            for group in project.findall("{*}PropertyGroup")
+        )
+    )
 
 
 def inspect_project(destination: Path) -> dict[str, Any]:
@@ -255,6 +282,19 @@ def inspect_project(destination: Path) -> dict[str, Any]:
             dotnet.extend(p for p in child.glob("*.csproj") if not linked(p) and p.is_file())
     if dotnet:
         stacks.append("dotnet")
+        build_script = root / "build-web.ps1"
+        if build_script in children and build_script.is_file():
+            command("build", "pwsh -File ./build-web.ps1", "build-web.ps1")
+        for project in sorted(dotnet):
+            if project.suffix != ".csproj" or not project.stem.casefold().endswith(".tests"):
+                continue
+            relative = project.relative_to(root).as_posix()
+            # Only render paths that are safe to copy into a shell command.
+            if not re.fullmatch(r"[A-Za-z0-9_. /-]+", relative):
+                continue
+            if executable_dotnet_test(root, relative):
+                target = f'"./{relative}"' if " " in relative else f"./{relative}"
+                command("test", f"dotnet run --project {target}", f"{relative} [OutputType=Exe]")
     for marker, stack in (
         ("project.godot", "godot"),
         ("game/project.godot", "godot"),

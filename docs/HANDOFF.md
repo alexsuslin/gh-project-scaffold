@@ -5,33 +5,38 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 ## Outcome and acceptance
 
-- Current goal: publish v0.3.1 with the Mypy and Pyright discovery added after the
-  notion-cli and busybar-ai-progress pilots.
-- Acceptance: align release version metadata, verify the release archive, and
-  confirm that main CI and the release workflow pass for the signed release commit.
+- Current goal: add .NET build and executable test command discovery after the KidPic pilot.
+- Acceptance: report unverified candidates for a root `build-web.ps1` and an explicit
+  executable `*.Tests.csproj`, with read-only fixture coverage and no changes to KidPic.
 - Scope: project-scaffolding and synthetic fixtures only.
 
 ## Current state
 
 - Last substantive update: 2026-11-11.
-- Release candidate: v0.3.1. Resolve the signed release tag to identify its source revision.
+- Published baseline: [v0.3.1](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.1)
+  at `1a76d1f`. Its main CI and release workflow passed.
 - Implemented: doctor text/JSON reports; offline additive adoption; provenance manifest;
   existing guidance/context preservation; shared handoff template; Python starter guidance.
 - Verified: CLI behavior on disposable repositories/worktrees, existing generator tests,
   package build/install, static checks and release archive smoke test (details below).
 - Release delivery: [v0.3.0](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.0)
   was published on 2026-11-11.
-- Local release candidate archive: dist/v0.3.1/github-project-ops-v0.3.1.zip and SHA256SUMS.
+- Verified published archive: `dist/v0.3.1-published/`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
   The follow-up was pushed as `0aa2d0d` and passed main CI on Windows and Ubuntu
-  with Python 3.11 and 3.14. Check CI for the release commit separately.
+  with Python 3.11 and 3.14.
+- KidPic follow-up: doctor now discovers the root web build script and executable
+  test projects in its existing shallow .NET scan. The owner authorized committing
+  and pushing this follow-up to main. Verify delivery using the CI run for this commit.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| KidPic discovery working changes | Readiness suite, Windows Python 3.14 | 28 passed, 1 skipped | `tmp-test-runs/doctor-dotnet-green`. KidPic-shaped and ambiguous .NET fixtures passed. Symlink creation unavailable. |
+| KidPic discovery working changes | Ruff lint/format and mypy | Passed | Repository quality checks. |
 | v0.3.1 release candidate | Full pytest, Windows Python 3.14 | 75 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.1 release candidate | Lockfile, Ruff, Mypy and local archive | Passed | `uv lock --check --offline`. Archive SHA-256 matched SHA256SUMS. Extracted doctor detected both type checkers with site-packages disabled. |
 | Doctor type checker discovery | Full pytest suite, Windows Python 3.14 | 75 passed, 1 skipped | Both pilot fixtures and the targetless Mypy case passed. Symlink creation was unavailable. The full run used a short temporary path and process-scoped Git long-path support. |
@@ -54,6 +59,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Release acceptance: main contains the implementation, signed v0.3.1 identifies the
-  intended source, CI and the release workflow pass, and the published ZIP matches SHA256SUMS.
-- Next action: verify main CI and the published v0.3.1 assets after pushing the release tag.
+- Next action: verify main CI for the .NET discovery commit.

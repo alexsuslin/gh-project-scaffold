@@ -39,8 +39,13 @@ Python check candidates come from pytest, Ruff, Mypy and Pyright configuration i
 suggests `mypy .` when no targets are configured. Pyright uses its configured scope.
 Node candidates require exactly one recognized npm/pnpm/Yarn lockfile and known
 script names.
+For .NET, doctor suggests `pwsh -File ./build-web.ps1` when that script is a
+regular file at the root. It suggests `dotnet run --project` for `*.Tests.csproj`
+files in the bounded scan with one explicit, unconditional `OutputType=Exe`.
+Discovery reads XML metadata without evaluating MSBuild imports or properties.
+Paths with shell metacharacters and linked files are skipped.
 These are hints: confirm environment prerequisites and side effects before execution.
-No test/build/deploy command is invented for .NET, infrastructure or unknown stacks.
+No test/build/deploy command is inferred for infrastructure or unknown stacks.
 
 Git calls disable optional locks and filesystem-monitor hooks. No fetch, index write,
 package installation or project command is performed. The tool does not inspect the
