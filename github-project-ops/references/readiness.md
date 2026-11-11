@@ -44,6 +44,9 @@ regular file at the root. It suggests `dotnet run --project` for `*.Tests.csproj
 files in the bounded scan with one explicit, unconditional `OutputType=Exe`.
 Discovery reads XML metadata without evaluating MSBuild imports or properties.
 Paths with shell metacharacters and linked files are skipped.
+For Godot, a `project.godot` at the root or under `game/` enables discovery of
+the repository's `scripts/check.ps1`. If it is a regular, unlinked file, doctor
+suggests `pwsh -File ./scripts/check.ps1` from the repository root.
 These are hints: confirm environment prerequisites and side effects before execution.
 No test/build/deploy command is inferred for infrastructure or unknown stacks.
 

@@ -5,16 +5,16 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 ## Outcome and acceptance
 
-- Current goal: release v0.3.2 with .NET build and executable test command discovery.
-- Acceptance: align version metadata, verify the packaged doctor on a KidPic-shaped
-  fixture, and confirm main CI and publication for the signed release commit.
+- Current goal: discover the existing check script for Godot projects after the Erase Garden pilot.
+- Acceptance: report `pwsh -File ./scripts/check.ps1` as an unverified candidate when
+  Godot is detected and the script is a regular file. Verify read-only behavior on fixtures.
 - Scope: project-scaffolding and synthetic fixtures only.
 
 ## Current state
 
 - Last substantive update: 2026-11-11.
-- Published baseline: [v0.3.1](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.1)
-  at `1a76d1f`. Its main CI and release workflow passed.
+- Published baseline: [v0.3.2](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.2)
+  at `c1261ac`. Main and tag CI and the release workflow passed.
 - Implemented: doctor text/JSON reports; offline additive adoption; provenance manifest;
   existing guidance/context preservation; shared handoff template; Python starter guidance.
 - Verified: CLI behavior on disposable repositories/worktrees, existing generator tests,
@@ -22,7 +22,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Release delivery: [v0.3.0](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.0)
   was published on 2026-11-11.
 - Verified published archive: `dist/v0.3.1-published/`.
-- v0.3.2 release candidate archive: `dist/v0.3.2/`.
+- Verified v0.3.2 archive: `dist/v0.3.2-published/`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
@@ -30,12 +30,16 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
   with Python 3.11 and 3.14.
 - KidPic follow-up: `50f6b7a` added discovery for the root web build script and
   executable test projects. Main CI passed on Windows and Ubuntu with Python 3.11
-  and 3.14. The owner authorized releasing this change as v0.3.2.
+  and 3.14. The change was published in v0.3.2.
+- Erase Garden follow-up: the local doctor reports the check script for both
+  supported Godot marker locations. The fixtures use only synthetic project files.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| Godot discovery working changes | Readiness suite, Windows Python 3.14 | 32 passed, 1 skipped | `tmp-test-runs/doctor-godot-green`. Both marker layouts, invalid candidates and read-only behavior passed. Symlink creation unavailable. |
+| Godot discovery working changes | Ruff lint/format and mypy | Passed | Repository quality checks. |
 | v0.3.2 release candidate | Full pytest, Windows Python 3.14 | 77 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.2 release candidate | Lockfile, Ruff, Mypy and local archive | Passed | `uv lock --check --offline`. Archive matched SHA256SUMS and extracted doctor reported both .NET candidates. |
 | KidPic discovery working changes | Readiness suite, Windows Python 3.14 | 28 passed, 1 skipped | `tmp-test-runs/doctor-dotnet-green`. KidPic-shaped and ambiguous .NET fixtures passed. Symlink creation unavailable. |
@@ -62,4 +66,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action: verify main CI and the published v0.3.2 assets after pushing the signed tag.
+- Next action: verify main CI for the Godot discovery commit authorized for push.

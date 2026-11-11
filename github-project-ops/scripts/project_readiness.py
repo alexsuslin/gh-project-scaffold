@@ -304,6 +304,14 @@ def inspect_project(destination: Path) -> dict[str, Any]:
     ):
         if (root / marker).is_file() and stack not in stacks:
             stacks.append(stack)
+    if "godot" in stacks:
+        check_script = "scripts/check.ps1"
+        try:
+            has_check_script = safe_path(root, check_script).is_file()
+        except (OSError, ValueError):
+            has_check_script = False
+        if has_check_script:
+            command("check", f"pwsh -File ./{check_script}", check_script)
     instructions = [name for name in INSTRUCTIONS if (root / name).exists() or linked(root / name)]
     for name in instructions:
         try:

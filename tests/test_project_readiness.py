@@ -196,6 +196,50 @@ def test_doctor_reports_python_type_check_candidates(
     assert snapshot(repository) == before
 
 
+@pytest.mark.parametrize("marker", ["project.godot", "game/project.godot"])
+def test_doctor_reports_godot_project_check_without_running_it(repository, marker):
+    project_file = repository / marker
+    project_file.parent.mkdir(exist_ok=True)
+    project_file.write_text('config_version=5\n[application]\nconfig/name="Fixture"\n')
+    (repository / "scripts").mkdir()
+    (repository / "scripts/check.ps1").write_text("'ran' | Set-Content EXECUTED\n")
+    git(repository, "add", "application.txt")
+    index = (repository / ".git/index").read_bytes()
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["stacks"] == ["godot"]
+    assert report["commands"] == [
+        {
+            "name": "check",
+            "command": "pwsh -File ./scripts/check.ps1",
+            "source": "scripts/check.ps1",
+            "verified": False,
+        }
+    ]
+    assert "commands_unknown" not in {item["code"] for item in report["findings"]}
+    assert report["checks_executed"] is False
+    assert snapshot(repository) == before
+    assert (repository / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize("has_godot_marker", [False, True])
+def test_doctor_requires_godot_marker_and_regular_check_script(repository, has_godot_marker):
+    (repository / "scripts").mkdir()
+    check = repository / "scripts/check.ps1"
+    if has_godot_marker:
+        (repository / "project.godot").touch()
+        check.mkdir()
+    else:
+        check.touch()
+
+    report = json.loads(run("doctor", repository, "--json").stdout)
+    assert report["commands"] == []
+    assert "commands_unknown" in {item["code"] for item in report["findings"]}
+
+
 def test_doctor_invalid_path_is_machine_readable(tmp_path):
     result = run("doctor", tmp_path / "missing", "--json")
     assert result.returncode == 2
