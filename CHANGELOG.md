@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.3 — 2026-11-11
+
+### Added
+
+- `doctor` suggests `pwsh -File ./scripts/check.ps1` for Godot projects with a
+  regular, unlinked check script. It recognizes `project.godot` at the root or
+  under `game/` and reports the command without running it.
+- Regression fixtures cover both Godot layouts and verify that discovery leaves
+  project files and the Git index unchanged.
+
 ## 0.3.2 — 2026-11-11
 
 ### Added
