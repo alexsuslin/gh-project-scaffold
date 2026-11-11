@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1 — 2026-11-11
+
+### Added
+
+- `doctor` reports Mypy and Pyright candidates from `pyproject.toml`, using
+  `uv run --locked` when the project has a `uv.lock`.
+- Mypy uses configured targets when present and suggests the project root otherwise.
+  Regression tests cover the Mypy and Pyright configurations found in both adoption pilots.
+
 ## 0.3.0 — 2026-11-11
 
 ### Added
