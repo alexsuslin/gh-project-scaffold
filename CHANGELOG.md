@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.10 — 2026-11-12
+
+### Added
+
+- `doctor` and `adopt --preview` suggest `pwsh -File ./scripts/check.ps1 -Format Check`
+  when the root README documents it and `scripts/check.ps1` is a regular, unlinked file.
+- Regression fixtures cover the documented command, missing prerequisites, and the
+  Godot fallback when the README omits the formatting check.
+
 ## 0.3.9 — 2026-11-12
 
 ### Added
