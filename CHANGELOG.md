@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.7 — 2026-11-12
+
+### Added
+
+- For npm projects that define both scripts, `doctor` suggests `npm run build && npm run test:browser`
+  when the root README documents that order. Adopt previews use the same candidate.
+- Regression fixtures cover consecutive command lines with comments, an inline command chain,
+  and fallback to the standalone browser test candidate.
+
 ## 0.3.6 — 2026-11-11
 
 ### Added
