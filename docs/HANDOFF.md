@@ -16,14 +16,15 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - v0.3.9 is published and the goodreads-cli and myshows-cli pilots are complete.
   Adoption landed in GitHub `main` and CI passed for both commits. Installed
   doctor v0.3.9 suggests `make check` in both projects.
-- Release v0.3.10 includes the dotfiles PowerShell formatting check. Verify the
-  signed tag, CI, and the command suggestion from the published archive.
+- v0.3.10 is published and the dotfiles pilot is complete. Adoption is in GitHub
+  `master`, CI passed on the adoption commit, and installed doctor v0.3.10
+  suggests `pwsh -File ./scripts/check.ps1 -Format Check`.
 
 ## Current state
 
 - Last substantive update: 2026-11-12.
-- Published baseline is v0.3.9 at `8cbe2cc`. GitHub verified the signed tag. Main
-  and tag CI and the release workflow passed. [Release v0.3.9](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.9)
+- Published baseline is v0.3.10 at `11bf474`. GitHub verified the signed tag. Main
+  and tag CI and the release workflow passed. [Release v0.3.10](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.10)
 - Implemented: doctor text/JSON reports; offline additive adoption; provenance manifest;
   existing guidance/context preservation; shared handoff template; Python starter guidance.
 - Verified: CLI behavior on disposable repositories/worktrees, existing generator tests,
@@ -39,7 +40,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Verified v0.3.7 archive at `dist/v0.3.7-published/`. The ZIP matched `SHA256SUMS`.
 - Verified v0.3.8 archive at `dist/v0.3.8-published/`. The ZIP matched `SHA256SUMS`.
 - Verified v0.3.9 archive at `dist/v0.3.9-published/`. The ZIP matched `SHA256SUMS`.
-- v0.3.10 release candidate archive at `dist/v0.3.10/`.
+- Verified v0.3.10 archive at `dist/v0.3.10-published/`. The ZIP matched `SHA256SUMS`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
@@ -79,6 +80,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| dotfiles `e04c639` on `master` | Installed doctor v0.3.10 and manually dispatched adoption CI | Doctor exit 0, CI passed | Doctor suggested `pwsh -File ./scripts/check.ps1 -Format Check` from `README.md` and `scripts/check.ps1` without running it. [Signed adoption commit](https://github.com/alexsuslin/dotfiles/commit/e04c639592055ef394e369f7bf7252b58340b924) · [CI run](https://github.com/alexsuslin/dotfiles/actions/runs/43240004088) |
 | v0.3.10 release candidate | Full pytest on Windows | 124 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.10 release candidate | Lockfile, Ruff, mypy, and local archive | Passed | The ZIP matched `SHA256SUMS`. Doctor from the archive suggested the PowerShell formatting check on a synthetic repository. |
 | `4c01271` | Main CI on Ubuntu and Windows, Python 3.11 and 3.14 | Passed | [CI run](https://github.com/alexsuslin/gh-project-scaffold/actions/runs/43248583563) |
@@ -140,4 +142,5 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Publish v0.3.10 and verify its CI runs and published archive.
+- For the next adoption pilot, the maintainer can select a repository for a
+  read-only doctor check and adopt preview.
