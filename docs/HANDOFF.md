@@ -11,6 +11,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - v0.3.7 is published and the hellisus-cheatsheet pilot is complete.
 - Adoption is in GitHub `main`, CI and Pages deployment passed, and installed
   doctor v0.3.7 suggests `npm run build && npm run test:browser` from the README.
+- Current follow-up adds discovery of the documented PowerShell test sequence.
 
 ## Current state
 
@@ -59,11 +60,16 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Browser test follow-up `20c35af` reports the README's `npm run build && npm run test:browser`
   sequence as an unverified candidate when both npm scripts are defined.
   Main CI passed on Windows and Ubuntu with Python 3.11 and 3.14.
+- obsidian-memory adopted with its existing `docs/CONTEXT.md` in signed commit
+  `db9899e` on GitHub `main`. The pilot exposed a missing Pester candidate.
+- Doctor now reports the complete documented Pester sequence as `test:powershell`,
+  including the test counts and the failure check.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| PowerShell test discovery | Readiness suite on Windows | 55 passed, 2 skipped | Synthetic repositories cover the documented sequence, partial and altered blocks, and read-only behavior. Junction and symlink creation were unavailable. Ruff, mypy, and PowerShell syntax parsing passed. |
 | hellisus-cheatsheet `a3a461a` | Installed doctor v0.3.7 | Exit 0 | Read the README and suggested `npm run build && npm run test:browser`. Doctor reported the command without executing it. |
 | v0.3.7 release candidate | Full pytest on Windows | 101 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.7 release candidate | Lockfile, Ruff, mypy, and local archive | Passed | The ZIP matched `SHA256SUMS`. Doctor from the archive suggested the sequence on a synthetic npm repository. |
@@ -111,4 +117,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action is for the owner to review this handoff update before committing it.
+- Next action is to review the PowerShell test discovery changes before committing them.

@@ -66,8 +66,13 @@ Paths with shell metacharacters and linked files are skipped.
 For Godot, a `project.godot` at the root or under `game/` enables discovery of
 the repository's `scripts/check.ps1`. If it is a regular, unlinked file, doctor
 suggests `pwsh -File ./scripts/check.ps1` from the repository root.
-These are hints: confirm environment prerequisites and side effects before execution.
-No test/build/deploy command is inferred for infrastructure or unknown stacks.
+Doctor recognizes the documented PowerShell test sequence that imports Pester
+3.4.0, runs `*.Tests.ps1` from `.\vault\_system\tests`, reports the counts, and
+throws on failures. It matches the complete sequence in the root README and
+reports a fixed `test:powershell` candidate, including the failure check.
+This discovery also works in repositories without a recognized stack marker.
+
+Confirm environment prerequisites and side effects before running candidates.
 
 Git calls disable optional locks and filesystem-monitor hooks. No fetch, index write,
 package installation or project command is performed. The tool does not inspect the

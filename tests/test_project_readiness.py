@@ -12,6 +12,12 @@ from test_generator import snapshot
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "github-project-ops/scripts/scaffold.py"
 PAPER_LAB_UNITTEST = r"& '.\.venv-paper\Scripts\python.exe' -m unittest discover -s tests -q"
+PESTER_README_CHECK = r"""Import-Module Pester -RequiredVersion 3.4.0
+$results = foreach ($suite in Get-ChildItem -LiteralPath .\vault\_system\tests -Filter '*.Tests.ps1') {
+    Invoke-Pester -Script $suite.FullName -PassThru
+}
+$results | Select-Object PassedCount, FailedCount
+if (($results | Measure-Object FailedCount -Sum).Sum -gt 0) { throw 'Tests failed' }"""
 
 
 def run(*arguments):
@@ -501,6 +507,65 @@ def test_doctor_does_not_infer_paper_lab_check_from_partial_match(repository, re
     assert result.returncode == 1, result.stderr
     report = json.loads(result.stdout)
     assert [item["command"] for item in report["commands"]] == ["python -m pytest"]
+    assert "private-fixture" not in result.stdout
+
+
+def test_doctor_reports_documented_powershell_test_suite(repository):
+    (repository / "README.md").write_text(
+        f"~~~powershell\n{PESTER_README_CHECK}\n~~~\n\n"
+        "~~~powershell\npwsh -File .\\scripts\\Test-Vault.ps1 -VaultPath C:\\fixture-vault\n~~~\n",
+        encoding="utf-8",
+    )
+    git(repository, "add", "application.txt")
+    index = (repository / ".git/index").read_bytes()
+    before = snapshot(repository)
+    expected = (
+        "Import-Module Pester -RequiredVersion 3.4.0; "
+        r"$results = foreach ($suite in Get-ChildItem -LiteralPath .\vault\_system\tests "
+        "-Filter '*.Tests.ps1') { Invoke-Pester -Script $suite.FullName -PassThru }; "
+        "$results | Select-Object PassedCount, FailedCount; "
+        "if (($results | Measure-Object FailedCount -Sum).Sum -gt 0) { throw 'Tests failed' }"
+    )
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["commands"] == [
+        {
+            "name": "test:powershell",
+            "command": expected,
+            "source": "README.md",
+            "verified": False,
+        }
+    ]
+    assert "commands_unknown" not in {item["code"] for item in report["findings"]}
+    assert report["checks_executed"] is False
+    assert "fixture-vault" not in result.stdout
+    preview = run("adopt", repository, "--preview")
+    assert preview.returncode == 0, preview.stderr
+    assert f"test:powershell: `{expected}`" in preview.stdout
+    assert snapshot(repository) == before
+    assert (repository / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize(
+    "instructions",
+    [
+        PESTER_README_CHECK.rsplit("\n", 1)[0],
+        PESTER_README_CHECK.replace(r".\vault\_system\tests", r"C:\fixture-vault\tests"),
+        PESTER_README_CHECK.replace("-PassThru", "-PassThru; Write-Output private-fixture"),
+    ],
+    ids=["missing-failure-check", "different-test-path", "extra-shell-command"],
+)
+def test_doctor_does_not_suggest_modified_powershell_test_blocks(repository, instructions):
+    (repository / "README.md").write_text(f"~~~powershell\n{instructions}\n~~~\n", encoding="utf-8")
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["commands"] == []
+    assert "commands_unknown" in {item["code"] for item in report["findings"]}
+    assert "fixture-vault" not in result.stdout
     assert "private-fixture" not in result.stdout
 
 

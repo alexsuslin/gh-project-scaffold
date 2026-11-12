@@ -360,6 +360,21 @@ def inspect_project(destination: Path) -> dict[str, Any]:
             has_check_script = False
         if has_check_script:
             command("check", f"pwsh -File ./{check_script}", check_script)
+
+    pester_check = (
+        "Import-Module Pester -RequiredVersion 3.4.0",
+        (
+            "$results = foreach ($suite in Get-ChildItem -LiteralPath "
+            r".\vault\_system\tests -Filter '*.Tests.ps1') {"
+            "\nInvoke-Pester -Script $suite.FullName -PassThru\n}"
+        ),
+        "$results | Select-Object PassedCount, FailedCount",
+        "if (($results | Measure-Object FailedCount -Sum).Sum -gt 0) { throw 'Tests failed' }",
+    )
+    if readme_documents_command(root, "\n".join(pester_check)):
+        invocation = "; ".join(part.replace("\n", " ") for part in pester_check)
+        command("test:powershell", invocation, "README.md")
+
     instructions = [name for name in INSTRUCTIONS if (root / name).exists() or linked(root / name)]
     for name in instructions:
         try:
