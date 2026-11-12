@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.8 — 2026-11-12
+
+### Added
+
+- `doctor` recognizes the documented Pester 3.4.0 sequence in the root README and
+  suggests it as `test:powershell`. The candidate runs the listed `*.Tests.ps1`
+  suites, reports counts, and checks for failures. Adopt previews use the same candidate.
+- Regression fixtures cover complete and altered README blocks and read-only behavior.
+
 ## 0.3.7 — 2026-11-12
 
 ### Added

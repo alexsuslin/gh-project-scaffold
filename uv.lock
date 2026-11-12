@@ -85,7 +85,7 @@ wheels = [
 
 [[package]]
 name = "gh-project-scaffold-dev"
-version = "0.3.7"
+version = "0.3.8"
 source = { virtual = "." }
 
 [package.dev-dependencies]
