@@ -63,9 +63,11 @@ regular file at the root. It suggests `dotnet run --project` for `*.Tests.csproj
 files in the bounded scan with one explicit, unconditional `OutputType=Exe`.
 Discovery reads XML metadata without evaluating MSBuild imports or properties.
 Paths with shell metacharacters and linked files are skipped.
-For Godot, a `project.godot` at the root or under `game/` enables discovery of
-the repository's `scripts/check.ps1`. If it is a regular, unlinked file, doctor
-suggests `pwsh -File ./scripts/check.ps1` from the repository root.
+Doctor suggests `pwsh -File ./scripts/check.ps1 -Format Check` when the root
+README documents that exact command and `scripts/check.ps1` is a regular,
+unlinked file. For Godot projects marked by `project.godot` at the root or under
+`game/`, the same script also has a fallback candidate `pwsh -File ./scripts/check.ps1`
+when the README does not document the formatting check.
 Doctor recognizes the documented PowerShell test sequence that imports Pester
 3.4.0, runs `*.Tests.ps1` from `.\vault\_system\tests`, reports the counts, and
 throws on failures. It matches the complete sequence in the root README and

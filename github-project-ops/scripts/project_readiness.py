@@ -369,14 +369,18 @@ def inspect_project(destination: Path) -> dict[str, Any]:
     ):
         if (root / marker).is_file() and stack not in stacks:
             stacks.append(stack)
-    if "godot" in stacks:
-        check_script = "scripts/check.ps1"
-        try:
-            has_check_script = safe_path(root, check_script).is_file()
-        except (OSError, ValueError):
-            has_check_script = False
-        if has_check_script:
-            command("check", f"pwsh -File ./{check_script}", check_script)
+    check_script = "scripts/check.ps1"
+    try:
+        has_check_script = safe_path(root, check_script).is_file()
+    except (OSError, ValueError):
+        has_check_script = False
+    if has_check_script:
+        script_command = f"pwsh -File ./{check_script}"
+        format_check = f"{script_command} -Format Check"
+        if readme_documents_command(root, format_check, allow_line_comments=True):
+            command("check", format_check, f"README.md and {check_script}")
+        elif "godot" in stacks:
+            command("check", script_command, check_script)
 
     if makefile_declares_check(root) and readme_documents_command(
         root, "make check", allow_line_comments=True

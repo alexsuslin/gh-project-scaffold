@@ -523,6 +523,85 @@ def test_doctor_requires_godot_marker_and_regular_check_script(repository, has_g
     assert "commands_unknown" in {item["code"] for item in report["findings"]}
 
 
+@pytest.mark.parametrize(
+    ("readme", "godot"),
+    [
+        ("~~~powershell\n{check}\npwsh -File ./scripts/check.ps1 -Format Write\n~~~\n", False),
+        ("Run `{check}` from the repository root.\n", False),
+        ("{check} # Check formatting\n", True),
+    ],
+    ids=["dotfiles-fenced-command", "inline-command", "documented-check-in-godot"],
+)
+def test_doctor_suggests_documented_powershell_format_check_without_running_it(
+    repository, readme, godot
+):
+    expected = "pwsh -File ./scripts/check.ps1 -Format Check"
+    (repository / "README.md").write_text(readme.format(check=expected), encoding="utf-8")
+    if godot:
+        (repository / "project.godot").touch()
+    (repository / "scripts").mkdir()
+    (repository / "scripts/check.ps1").write_text("'ran' | Set-Content EXECUTED\n")
+    git(repository, "add", "application.txt")
+    index = (repository / ".git/index").read_bytes()
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["commands"] == [
+        {
+            "name": "check",
+            "command": expected,
+            "source": "README.md and scripts/check.ps1",
+            "verified": False,
+        }
+    ]
+    assert "commands_unknown" not in {item["code"] for item in report["findings"]}
+    assert report["checks_executed"] is False
+    assert "Set-Content" not in result.stdout
+    preview = run("adopt", repository, "--preview")
+    assert preview.returncode == 0, preview.stderr
+    assert f"check: `{expected}`" in preview.stdout
+    assert snapshot(repository) == before
+    assert (repository / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize(
+    ("readme_command", "script_kind"),
+    [
+        pytest.param(None, "file", id="missing-readme"),
+        pytest.param("pwsh -File ./scripts/check.ps1", "file", id="missing-format-option"),
+        pytest.param("pwsh -File ./scripts/check.ps1 -Format Write", "file", id="format-write"),
+        pytest.param(
+            "pwsh -File ./scripts/check.ps1 -Format Check; Write-Output private-fixture",
+            "file",
+            id="compound-command",
+        ),
+        pytest.param(
+            "pwsh -File ./scripts/check.ps1 -Format Check", "missing", id="missing-script"
+        ),
+        pytest.param("pwsh -File ./scripts/check.ps1 -Format Check", "directory", id="directory"),
+    ],
+)
+def test_doctor_requires_documented_format_check_and_regular_script(
+    repository, readme_command, script_kind
+):
+    if readme_command is not None:
+        (repository / "README.md").write_text(f"~~~powershell\n{readme_command}\n~~~\n")
+    (repository / "scripts").mkdir()
+    script = repository / "scripts/check.ps1"
+    if script_kind == "file":
+        script.touch()
+    elif script_kind == "directory":
+        script.mkdir()
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["commands"] == []
+    assert "commands_unknown" in {item["code"] for item in report["findings"]}
+
+
 def test_doctor_reports_documented_paper_lab_check(repository):
     (repository / "pyproject.toml").write_text('[project]\nname = "paper-lab-fixture"\n')
     setup = "$env:PYTHONPATH = 'src'"
