@@ -5,16 +5,15 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 ## Outcome and acceptance
 
-- Current goal: release v0.3.6 with README-aware Paper Lab check discovery.
-- Acceptance: align version metadata, verify packaged doctor on a Paper Lab fixture,
-  and confirm main CI and publication for the signed release commit.
-- Scope: project-scaffolding and synthetic fixtures only.
+- v0.3.6 is published and the defi-trader pilot is complete.
+- Acceptance met: installed doctor finds the Paper Lab command, adoption is in
+  GitHub `main`, and the offline suite passed on the adoption commit.
 
 ## Current state
 
-- Last substantive update: 2026-11-11.
-- Published baseline: [v0.3.5](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.5)
-  at `cca85e4`. Main and tag CI and the release workflow passed.
+- Last substantive update: 2026-11-12.
+- Published baseline: [v0.3.6](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.6)
+  at `62ee5ac`. GitHub verified the signed tag. Main and tag CI and the release workflow passed.
 - Implemented: doctor text/JSON reports; offline additive adoption; provenance manifest;
   existing guidance/context preservation; shared handoff template; Python starter guidance.
 - Verified: CLI behavior on disposable repositories/worktrees, existing generator tests,
@@ -26,7 +25,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Verified v0.3.3 archive: `dist/v0.3.3-published/`.
 - Verified v0.3.4 archive: `dist/v0.3.4-published/`.
 - Verified v0.3.5 archive: `dist/v0.3.5-published/`.
-- v0.3.6 release candidate archive: `dist/v0.3.6/`.
+- Verified v0.3.6 archive: `dist/v0.3.6-published/`. The ZIP matched `SHA256SUMS`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
@@ -44,14 +43,18 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Teo-tales follow-up: `afa0a19` added recognition of the documented Mypy command
   in doctor and adopt previews. Main CI passed on Windows and Ubuntu with Python
   3.11 and 3.14. The change was published in v0.3.5.
-- Paper Lab follow-up: `302a65c` added recognition of the two-line setup and
-  offline test command. Main CI passed on Windows and Ubuntu with Python 3.11 and
-  3.14. The owner authorized releasing this change as v0.3.6.
+- Paper Lab follow-up: `302a65c` added recognition of the README's PowerShell
+  setup and `unittest discover -s tests -q`. Installed doctor v0.3.6 found it in
+  defi-trader and reported it as a candidate.
+- defi-trader pilot: the signed adoption commit `0355d8cf` landed in GitHub `main`
+  with `.scaffold.json`, `docs/HANDOFF.md`, and a handoff link in `AGENTS.md`.
+  Signed follow-up `d5d7f0ab` recorded the offline test results in that handoff.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| defi-trader `0355d8cf` | `unittest discover -s tests -q` in a separate clone, Windows Python 3.13.15 | 358 passed, 2 symlink checks skipped | Used a fresh `.venv-paper` from both lockfiles. Result recorded in `d5d7f0ab`. |
 | v0.3.6 release candidate | Full pytest, Windows Python 3.14 | 94 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.6 release candidate | Lockfile, Ruff, Mypy and local archive | Passed | `uv lock --check --offline`. Archive matched SHA256SUMS and extracted doctor reported the Paper Lab offline check. |
 | README Paper Lab discovery | Readiness suite, Windows Python 3.14 | 45 passed, 1 skipped | `tmp-test-runs/doctor-paper-lab-green`. Exact match, partial matches, fallback, preview and prior README candidates checked. Symlink creation unavailable. |
@@ -94,4 +97,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action: verify main CI and the published v0.3.6 assets after pushing the signed tag.
+- Next action: owner reviews the handoff update before committing it.
