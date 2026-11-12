@@ -8,15 +8,15 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - v0.3.6 is published and the defi-trader pilot is complete.
 - Acceptance met: installed doctor finds the Paper Lab command, adoption is in
   GitHub `main`, and the offline suite passed on the adoption commit.
-- Current goal: release v0.3.7 with the README-aware npm browser test candidate.
-- Release acceptance: confirm the packaged doctor suggests the build and browser
-  test sequence, then verify the signed tag, GitHub Release, and CI on main and the tag.
+- v0.3.7 is published and the hellisus-cheatsheet pilot is complete.
+- Adoption is in GitHub `main`, CI and Pages deployment passed, and installed
+  doctor v0.3.7 suggests `npm run build && npm run test:browser` from the README.
 
 ## Current state
 
 - Last substantive update: 2026-11-12.
-- Published baseline: [v0.3.6](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.6)
-  at `62ee5ac`. GitHub verified the signed tag. Main and tag CI and the release workflow passed.
+- Published baseline is v0.3.7 at `aae0174`. GitHub verified the signed tag. Main
+  and tag CI and the release workflow passed. [Release v0.3.7](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.7)
 - Implemented: doctor text/JSON reports; offline additive adoption; provenance manifest;
   existing guidance/context preservation; shared handoff template; Python starter guidance.
 - Verified: CLI behavior on disposable repositories/worktrees, existing generator tests,
@@ -29,7 +29,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Verified v0.3.4 archive: `dist/v0.3.4-published/`.
 - Verified v0.3.5 archive: `dist/v0.3.5-published/`.
 - Verified v0.3.6 archive: `dist/v0.3.6-published/`. The ZIP matched `SHA256SUMS`.
-- v0.3.7 release candidate archive: `dist/v0.3.7/`.
+- Verified v0.3.7 archive at `dist/v0.3.7-published/`. The ZIP matched `SHA256SUMS`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
@@ -53,9 +53,9 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - defi-trader pilot: the signed adoption commit `0355d8cf` landed in GitHub `main`
   with `.scaffold.json`, `docs/HANDOFF.md`, and a handoff link in `AGENTS.md`.
   Signed follow-up `d5d7f0ab` recorded the offline test results in that handoff.
-- hellisus-cheatsheet pilot: signed adoption commit `a3a461a` documented the build
-  prerequisite in `AGENTS.md`. The Pages workflow passed through browser tests
-  and deployment. [Workflow run](https://github.com/alexsuslin/hellisus-cheatsheet/actions/runs/43222800020)
+- Signed adoption commit `a3a461a` reached `main` in hellisus-cheatsheet and documented
+  the build prerequisite in `AGENTS.md`. Biome, unit tests, the build, Playwright,
+  and Pages deployment passed. [Adoption commit](https://github.com/alexsuslin/hellisus-cheatsheet/commit/a3a461af8ddaba64359270559d7c83852f404c02) · [Workflow run](https://github.com/alexsuslin/hellisus-cheatsheet/actions/runs/43222800020)
 - Browser test follow-up `20c35af` reports the README's `npm run build && npm run test:browser`
   sequence as an unverified candidate when both npm scripts are defined.
   Main CI passed on Windows and Ubuntu with Python 3.11 and 3.14.
@@ -64,6 +64,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| hellisus-cheatsheet `a3a461a` | Installed doctor v0.3.7 | Exit 0 | Read the README and suggested `npm run build && npm run test:browser`. Doctor reported the command without executing it. |
 | v0.3.7 release candidate | Full pytest on Windows | 101 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.7 release candidate | Lockfile, Ruff, mypy, and local archive | Passed | The ZIP matched `SHA256SUMS`. Doctor from the archive suggested the sequence on a synthetic npm repository. |
 | npm browser test discovery | Readiness suite on Windows | 51 passed, 2 skipped | Synthetic repositories covered the commented command list, inline chain, and fallback cases. Junction and symlink creation were unavailable. Ruff and mypy passed. |
@@ -110,4 +111,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action: publish v0.3.7 and verify the CI runs and published ZIP.
+- Next action is for the owner to review this handoff update before committing it.
