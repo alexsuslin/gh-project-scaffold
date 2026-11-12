@@ -235,6 +235,67 @@ def test_doctor_keeps_browser_test_candidate_without_npm_build_order(
     ]
 
 
+@pytest.mark.parametrize(
+    ("readme", "rule"),
+    [
+        ("~~~sh\nmake test\nmake check\n~~~\n", "check:"),
+        ("Run `make check` from the repository root.\n", "lint check:"),
+        ("make check # Run all local checks\n", "check::"),
+    ],
+    ids=["fenced-command", "inline-command-and-multiple-targets", "comment-and-double-colon"],
+)
+def test_doctor_suggests_documented_make_check_without_running_it(repository, readme, rule):
+    (repository / "pyproject.toml").write_text("[tool.pytest.ini_options]\n")
+    (repository / "README.md").write_text(readme)
+    (repository / "Makefile").write_text(f".PHONY: check\n{rule}\n\t@echo private-fixture\n")
+    git(repository, "add", "application.txt")
+    index = (repository / ".git/index").read_bytes()
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert [item["command"] for item in report["commands"]] == ["python -m pytest", "make check"]
+    assert report["commands"][-1] == {
+        "name": "check",
+        "command": "make check",
+        "source": "README.md and Makefile",
+        "verified": False,
+    }
+    assert report["checks_executed"] is False
+    assert "private-fixture" not in result.stdout
+    preview = run("adopt", repository, "--preview")
+    assert preview.returncode == 0, preview.stderr
+    assert "check: `make check`" in preview.stdout
+    assert snapshot(repository) == before
+    assert (repository / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize(
+    ("readme", "makefile"),
+    [
+        pytest.param(None, "check:\n", id="missing-readme"),
+        pytest.param("make check\n", None, id="missing-makefile"),
+        pytest.param("make check\n", ".PHONY: check\nall: check\n", id="prerequisite-only"),
+        pytest.param("make check\n", "# check:\ncheck-all:\n", id="no-exact-target"),
+        pytest.param("make check\n", "check ::= value\n", id="make-variable"),
+        pytest.param("make check\n", "other:\n\tcheck:\n", id="recipe-line"),
+        pytest.param("make check && echo private-fixture\n", "check:\n", id="compound-command"),
+    ],
+)
+def test_doctor_requires_readme_and_makefile_for_make_check(repository, readme, makefile):
+    if readme is not None:
+        (repository / "README.md").write_text(readme)
+    if makefile is not None:
+        (repository / "Makefile").write_text(makefile)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["commands"] == []
+    assert "commands_unknown" in {item["code"] for item in report["findings"]}
+
+
 def test_doctor_reports_actual_root_and_nested_repository(repository, monkeypatch):
     child = repository / "src"
     child.mkdir()

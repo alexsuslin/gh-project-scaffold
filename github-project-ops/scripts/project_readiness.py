@@ -174,6 +174,23 @@ def readme_documents_command(
     return re.search(standalone, readme, re.MULTILINE) is not None
 
 
+def makefile_declares_check(root: Path) -> bool:
+    try:
+        makefile = read_text(root, "Makefile")
+    except (OSError, ValueError):
+        return False
+
+    # A literal rule header can name several targets. Recipe lines start with a tab.
+    return (
+        re.search(
+            r"^ *(?:[\w./+-]+[ \t]+)*check(?:[ \t]+[\w./+-]+)*[ \t]*::?(?![:=])",
+            makefile,
+            re.MULTILINE,
+        )
+        is not None
+    )
+
+
 def inspect_project(destination: Path) -> dict[str, Any]:
     requested = existing_directory(destination)
     root = requested
@@ -360,6 +377,11 @@ def inspect_project(destination: Path) -> dict[str, Any]:
             has_check_script = False
         if has_check_script:
             command("check", f"pwsh -File ./{check_script}", check_script)
+
+    if makefile_declares_check(root) and readme_documents_command(
+        root, "make check", allow_line_comments=True
+    ):
+        command("check", "make check", "README.md and Makefile")
 
     pester_check = (
         "Import-Module Pester -RequiredVersion 3.4.0",

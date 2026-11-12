@@ -72,6 +72,11 @@ throws on failures. It matches the complete sequence in the root README and
 reports a fixed `test:powershell` candidate, including the failure check.
 This discovery also works in repositories without a recognized stack marker.
 
+Doctor suggests `make check` when the root README documents that command and the
+root `Makefile` declares `check` in a literal rule header. It reads the two files
+without evaluating Makefile recipes or includes. Other check candidates remain
+available.
+
 Confirm environment prerequisites and side effects before running candidates.
 
 Git calls disable optional locks and filesystem-monitor hooks. No fetch, index write,
