@@ -11,15 +11,14 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - v0.3.7 is published and the hellisus-cheatsheet pilot is complete.
 - Adoption is in GitHub `main`, CI and Pages deployment passed, and installed
   doctor v0.3.7 suggests `npm run build && npm run test:browser` from the README.
-- Current goal is to release v0.3.8 with discovery of the documented PowerShell
-  test sequence. Acceptance includes verifying the signed tag, CI, and doctor
-  from the published ZIP on a synthetic repository.
+- v0.3.8 is published and the obsidian-memory pilot is complete. Adoption is in
+  GitHub `main`, and installed doctor v0.3.8 suggests the README's PowerShell tests.
 
 ## Current state
 
 - Last substantive update: 2026-11-12.
-- Published baseline is v0.3.7 at `aae0174`. GitHub verified the signed tag. Main
-  and tag CI and the release workflow passed. [Release v0.3.7](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.7)
+- Published baseline is v0.3.8 at `307ab7e`. GitHub verified the signed tag. Main
+  and tag CI and the release workflow passed. [Release v0.3.8](https://github.com/alexsuslin/gh-project-scaffold/releases/tag/v0.3.8)
 - Implemented: doctor text/JSON reports; offline additive adoption; provenance manifest;
   existing guidance/context preservation; shared handoff template; Python starter guidance.
 - Verified: CLI behavior on disposable repositories/worktrees, existing generator tests,
@@ -33,7 +32,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Verified v0.3.5 archive: `dist/v0.3.5-published/`.
 - Verified v0.3.6 archive: `dist/v0.3.6-published/`. The ZIP matched `SHA256SUMS`.
 - Verified v0.3.7 archive at `dist/v0.3.7-published/`. The ZIP matched `SHA256SUMS`.
-- v0.3.8 release candidate archive at `dist/v0.3.8/`.
+- Verified v0.3.8 archive at `dist/v0.3.8-published/`. The ZIP matched `SHA256SUMS`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
@@ -63,8 +62,8 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Browser test follow-up `20c35af` reports the README's `npm run build && npm run test:browser`
   sequence as an unverified candidate when both npm scripts are defined.
   Main CI passed on Windows and Ubuntu with Python 3.11 and 3.14.
-- obsidian-memory adopted with its existing `docs/CONTEXT.md` in signed commit
-  `db9899e` on GitHub `main`. The pilot exposed a missing Pester candidate.
+- Signed adoption commit `db9899e` added only `.scaffold.json` to obsidian-memory's
+  GitHub `main` and selected the existing `docs/CONTEXT.md` as handoff.
 - PowerShell follow-up `98d2fbc` reports the documented Pester sequence as
   `test:powershell`, including the test counts and failure check. Main CI passed
   on Windows and Ubuntu with Python 3.11 and 3.14.
@@ -73,6 +72,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| obsidian-memory `db9899e` | Installed doctor v0.3.8 | Exit 0 | Suggested the Pester 3.4.0 sequence from the README as `test:powershell` and resolved `docs/CONTEXT.md` as handoff. Pester was not run. |
 | v0.3.8 release candidate | Full pytest on Windows | 105 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.8 release candidate | Lockfile, Ruff, mypy, and local archive | Passed | The ZIP matched `SHA256SUMS`. Doctor from the archive suggested `test:powershell` on a synthetic repository. |
 | PowerShell test discovery | Readiness suite on Windows | 55 passed, 2 skipped | Synthetic repositories cover the documented sequence, partial and altered blocks, and read-only behavior. Junction and symlink creation were unavailable. Ruff, mypy, and PowerShell syntax parsing passed. |
@@ -123,4 +123,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action is to publish v0.3.8 and verify its CI runs and published ZIP.
+- Next action is for the owner to review this handoff update before committing it.
