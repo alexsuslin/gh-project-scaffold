@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.9 — 2026-11-12
+
+### Added
+
+- `doctor` and `adopt --preview` suggest `make check` when the root README
+  documents the command and the root Makefile declares a literal `check` target.
+  Existing check suggestions remain available.
+- Regression fixtures cover the README forms, Makefile rules, and read-only behavior.
+
 ## 0.3.8 — 2026-11-12
 
 ### Added

@@ -13,8 +13,8 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
   doctor v0.3.7 suggests `npm run build && npm run test:browser` from the README.
 - v0.3.8 is published and the obsidian-memory pilot is complete. Adoption is in
   GitHub `main`, and installed doctor v0.3.8 suggests the README's PowerShell tests.
-- Current follow-up adds `make check` discovery when both the README command
-  and a literal Makefile target are present.
+- Current goal is to release v0.3.9 with `make check` discovery. Acceptance
+  includes verifying the signed tag, CI, and doctor from the published ZIP.
 
 ## Current state
 
@@ -35,6 +35,7 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - Verified v0.3.6 archive: `dist/v0.3.6-published/`. The ZIP matched `SHA256SUMS`.
 - Verified v0.3.7 archive at `dist/v0.3.7-published/`. The ZIP matched `SHA256SUMS`.
 - Verified v0.3.8 archive at `dist/v0.3.8-published/`. The ZIP matched `SHA256SUMS`.
+- v0.3.9 release candidate archive at `dist/v0.3.9/`.
 - Pilot follow-up: notion-cli exposed a missing Mypy candidate and busybar-ai-progress
   exposed a missing Pyright candidate. Doctor now detects both via pyproject.toml.
   Mypy delegates to configured targets or proposes the repository root as a fallback.
@@ -74,6 +75,9 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| v0.3.9 release candidate | Full pytest on Windows | 115 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
+| v0.3.9 release candidate | Lockfile, Ruff, mypy, and local archive | Passed | The ZIP matched `SHA256SUMS`. Doctor from the archive suggested `make check` on a synthetic repository. |
+| `d22a37b` | Main CI on Ubuntu and Windows, Python 3.11 and 3.14 | Passed | [CI run](https://github.com/alexsuslin/gh-project-scaffold/actions/runs/43242112165) |
 | Make check discovery after the goodreads-cli and myshows-cli pilots | Readiness suite on Windows | 65 passed, 2 skipped | Synthetic repositories covered README formats, literal rule headers, missing evidence, and read-only behavior. Junction and symlink creation were unavailable. Ruff and mypy passed. |
 | obsidian-memory `db9899e` | Installed doctor v0.3.8 | Exit 0 | Suggested the Pester 3.4.0 sequence from the README as `test:powershell` and resolved `docs/CONTEXT.md` as handoff. Pester was not run. |
 | v0.3.8 release candidate | Full pytest on Windows | 105 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
@@ -126,4 +130,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action is to review the `make check` discovery changes before committing them.
+- Next action is to publish v0.3.9 and verify its CI runs and published ZIP.
