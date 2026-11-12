@@ -154,7 +154,9 @@ def executable_dotnet_test(root: Path, project_file: str) -> bool:
     )
 
 
-def readme_documents_command(root: Path, command: str) -> bool:
+def readme_documents_command(
+    root: Path, command: str, *, allow_line_comments: bool = False
+) -> bool:
     try:
         readme = read_text(root, "README.md")
     except (OSError, ValueError):
@@ -163,8 +165,9 @@ def readme_documents_command(root: Path, command: str) -> bool:
     lines = [
         r"[ \t]+".join(re.escape(part) for part in line.split()) for line in command.splitlines()
     ]
-    invocation = r"[ \t]*\r?\n[ \t]*".join(lines)
-    standalone = rf"^[ \t]*{invocation}[ \t]*\r?$"
+    line_end = r"(?:[ \t]+#[^\r\n]*)?[ \t]*" if allow_line_comments else r"[ \t]*"
+    invocation = rf"{line_end}\r?\n[ \t]*".join(lines)
+    standalone = rf"^[ \t]*{invocation}{line_end}\r?$"
     if len(lines) == 1:
         inline_code = rf"(?<!`)`[ \t]*{invocation}[ \t]*`(?!`)"
         standalone = f"{standalone}|{inline_code}"
@@ -280,9 +283,24 @@ def inspect_project(destination: Path) -> dict[str, Any]:
                 )
             else:
                 manager = managers[0]
+                scripts = package.get("scripts", {})
                 for name in ("test", "check", "lint", "build", "test:browser", "smoke"):
-                    if isinstance(package.get("scripts", {}).get(name), str):
-                        command(name, f"{manager} run {name}", f"package.json scripts.{name}")
+                    if not isinstance(scripts.get(name), str):
+                        continue
+                    if (
+                        manager == "npm"
+                        and name == "test:browser"
+                        and isinstance(scripts.get("build"), str)
+                    ):
+                        build = "npm run build"
+                        browser_test = "npm run test:browser"
+                        sequence = f"{build} && {browser_test}"
+                        if readme_documents_command(
+                            root, f"{build}\n{browser_test}", allow_line_comments=True
+                        ) or readme_documents_command(root, sequence):
+                            command(name, sequence, "README.md")
+                            continue
+                    command(name, f"{manager} run {name}", f"package.json scripts.{name}")
                 if manager == "npm":
                     documented_npm = "npm ci --ignore-scripts"
                     if readme_documents_command(root, documented_npm):

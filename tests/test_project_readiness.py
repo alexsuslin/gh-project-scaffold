@@ -122,6 +122,113 @@ def test_doctor_keeps_npm_ci_without_an_exact_documented_command(repository, ins
     assert "private-command" not in result.stdout
 
 
+@pytest.mark.parametrize(
+    "instructions",
+    [
+        (
+            "```sh\nnpm test\n"
+            "npm run build        # Build the static site\n"
+            "npm run test:browser # Check the built site\n```\n"
+        ),
+        "Run `npm run build && npm run test:browser` for browser checks.\n",
+    ],
+    ids=["commented-command-list", "inline-chain"],
+)
+def test_doctor_suggests_documented_build_before_browser_tests(repository, instructions):
+    (repository / "package.json").write_text(
+        '{"scripts":{"build":"node build.mjs","test:browser":"playwright test"}}'
+    )
+    (repository / "package-lock.json").write_text("{}")
+    (repository / "README.md").write_text(instructions, encoding="utf-8")
+    before = snapshot(repository)
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert report["commands"] == [
+        {
+            "name": "build",
+            "command": "npm run build",
+            "source": "package.json scripts.build",
+            "verified": False,
+        },
+        {
+            "name": "test:browser",
+            "command": "npm run build && npm run test:browser",
+            "source": "README.md",
+            "verified": False,
+        },
+        {
+            "name": "bootstrap",
+            "command": "npm ci",
+            "source": "package-lock.json",
+            "verified": False,
+        },
+    ]
+    assert report["checks_executed"] is False
+    preview = run("adopt", repository, "--preview")
+    assert preview.returncode == 0, preview.stderr
+    assert "test:browser: `npm run build && npm run test:browser`" in preview.stdout
+    assert snapshot(repository) == before
+
+
+@pytest.mark.parametrize(
+    ("lockfile", "build_script", "instructions", "expected"),
+    [
+        pytest.param("package-lock.json", True, "", "npm", id="no-instructions"),
+        pytest.param(
+            "package-lock.json",
+            True,
+            "npm run test:browser\nnpm run build\n",
+            "npm",
+            id="reverse-order",
+        ),
+        pytest.param(
+            "package-lock.json",
+            True,
+            "npm run build -- --mode=development\nnpm run test:browser\n",
+            "npm",
+            id="build-with-arguments",
+        ),
+        pytest.param(
+            "package-lock.json",
+            False,
+            "npm run build\nnpm run test:browser\n",
+            "npm",
+            id="missing-build-script",
+        ),
+        pytest.param(
+            "pnpm-lock.yaml",
+            True,
+            "npm run build\nnpm run test:browser\n",
+            "pnpm",
+            id="different-package-manager",
+        ),
+    ],
+)
+def test_doctor_keeps_browser_test_candidate_without_npm_build_order(
+    repository, lockfile, build_script, instructions, expected
+):
+    scripts = {"test:browser": "playwright test"}
+    if build_script:
+        scripts["build"] = "node build.mjs"
+    (repository / "package.json").write_text(json.dumps({"scripts": scripts}))
+    (repository / lockfile).write_text("{}")
+    (repository / "README.md").write_text(instructions, encoding="utf-8")
+
+    result = run("doctor", repository, "--json")
+    assert result.returncode == 1, result.stderr
+    report = json.loads(result.stdout)
+    assert [item for item in report["commands"] if item["name"] == "test:browser"] == [
+        {
+            "name": "test:browser",
+            "command": f"{expected} run test:browser",
+            "source": "package.json scripts.test:browser",
+            "verified": False,
+        }
+    ]
+
+
 def test_doctor_reports_actual_root_and_nested_repository(repository, monkeypatch):
     child = repository / "src"
     child.mkdir()

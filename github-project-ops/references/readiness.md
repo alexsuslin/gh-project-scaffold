@@ -52,6 +52,11 @@ $env:PYTHONPATH = 'src'
 Node candidates require exactly one recognized npm/pnpm/Yarn lockfile and known
 script names. For npm, an exact `npm ci --ignore-scripts` command on its own line
 or in inline code in the root `README.md` replaces the default `npm ci` candidate.
+When npm projects define both `build` and `test:browser` scripts, doctor suggests
+`npm run build && npm run test:browser` as the browser check if the root README
+shows the commands on consecutive lines in that order or shows the exact chain.
+The two-line form may include trailing `#` comments. The standalone build
+candidate remains available.
 Doctor reports only the fixed command and the README filename as evidence.
 For .NET, doctor suggests `pwsh -File ./build-web.ps1` when that script is a
 regular file at the root. It suggests `dotnet run --project` for `*.Tests.csproj`

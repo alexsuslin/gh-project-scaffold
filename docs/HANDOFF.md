@@ -8,6 +8,8 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - v0.3.6 is published and the defi-trader pilot is complete.
 - Acceptance met: installed doctor finds the Paper Lab command, adoption is in
   GitHub `main`, and the offline suite passed on the adoption commit.
+- Current follow-up verifies that doctor recommends building before browser
+  tests when an npm project's README documents that order.
 
 ## Current state
 
@@ -49,11 +51,17 @@ and limitations are documented in [the readiness guide](../github-project-ops/re
 - defi-trader pilot: the signed adoption commit `0355d8cf` landed in GitHub `main`
   with `.scaffold.json`, `docs/HANDOFF.md`, and a handoff link in `AGENTS.md`.
   Signed follow-up `d5d7f0ab` recorded the offline test results in that handoff.
+- hellisus-cheatsheet pilot: signed adoption commit `a3a461a` documented the build
+  prerequisite in `AGENTS.md`. The Pages workflow passed through browser tests
+  and deployment. [Workflow run](https://github.com/alexsuslin/hellisus-cheatsheet/actions/runs/43222800020)
+- Doctor now reports the README's `npm run build && npm run test:browser` sequence
+  as an unverified candidate when both npm scripts are defined.
 
 ## Evidence
 
 | Revision or working state | Check / environment | Result | Evidence |
 | --- | --- | --- | --- |
+| npm browser test discovery | Readiness suite on Windows | 51 passed, 2 skipped | Synthetic repositories covered the commented command list, inline chain, and fallback cases. Junction and symlink creation were unavailable. Ruff and mypy passed. |
 | defi-trader `0355d8cf` | `unittest discover -s tests -q` in a separate clone, Windows Python 3.13.15 | 358 passed, 2 symlink checks skipped | Used a fresh `.venv-paper` from both lockfiles. Result recorded in `d5d7f0ab`. |
 | v0.3.6 release candidate | Full pytest, Windows Python 3.14 | 94 passed, 1 skipped | Symlink creation unavailable. Used a short temporary path and process-scoped Git long-path support. |
 | v0.3.6 release candidate | Lockfile, Ruff, Mypy and local archive | Passed | `uv lock --check --offline`. Archive matched SHA256SUMS and extracted doctor reported the Paper Lab offline check. |
@@ -97,4 +105,4 @@ pytest.exe was blocked by Windows Application Control; python -m pytest worked.
   unverified candidates. Doctor does not assess the semantic freshness of handoff prose.
 - Adoption records provenance only; Copier update support for adopted repositories
   is not implemented. Existing instructions are preserved rather than edited to add links.
-- Next action: owner reviews the handoff update before committing it.
+- Next action: review and commit the browser test discovery changes when authorized.
